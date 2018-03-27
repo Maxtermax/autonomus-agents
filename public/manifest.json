@@ -1,0 +1,22 @@
+{
+  "name": "Space invaders example PWA",
+  "short_name": "Space invaders",
+  "start_url": "/",
+  "display": "standalone",
+  "icons": [
+    {
+      "src": "/invader.png",
+      "sizes": "48x48",
+      "type": "image/jpg"
+    }
+  ],
+  "related_applications": [
+    {
+      "platform": "web"
+    },
+    {
+      "platform": "play",
+      "url": "https://play.google.com/store/apps/details?id=com.google.samples.apps.iosched"
+    }
+  ]
+}
