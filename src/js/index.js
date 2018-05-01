@@ -18,7 +18,17 @@ class Universe {
 
   render() {
     let game = setInterval(() => {
-      clear(canvas);            
+      clear(canvas);  
+      ctx.save();   
+      ctx.beginPath();      
+      ctx.lineTo(canvas.width/2, 0);
+      ctx.lineTo(canvas.width/2, canvas.height);
+      ctx.moveTo(0, canvas.height/2);
+      ctx.lineTo(canvas.width, canvas.height/2);
+      ctx.strokeStyle = 'white';
+      ctx.stroke();
+      ctx.closePath();       
+      ctx.restore();
       this.update();
     }, this.FPS)
   }
@@ -39,12 +49,27 @@ class Universe {
     nav.bound = true;
   }
 
+  updateAngle(clientX, clientY) {
+    let convertX = clientX - canvas.width/2;
+    let convertY = canvas.height/2 - clientY;
+     let nav = this.stage.find('nav');      
+     var rad = Math.atan2(convertX, convertY);
+     var deg = rad * (180 / Math.PI);
+     //console.log( `rad: ${ rad }, deg: ${ deg }, x: ${ convertX }, y: ${ convertY }`);
+     nav.angle = deg; 
+  }
+
   preload() {
     this.stage = new Stage(canvas, true);
-    let nav = new SpaceShip({width: 25, height: 25, x: 200, y: 10, ctx, color: 'white', id: 'nav' });
+    let nav = new SpaceShip({width: 25, height: 25, x: 150, y: 200, ctx, color: 'white', id: 'nav' });
     this.stage.push(nav);
     let onMove = this.moveEvent.bind(this);
     this.controls = new Controls({stage: this.stage, canvas, onMove}, true);
+
+    canvas.addEventListener("touchstart", e => {
+      let { clientX, clientY } = e.targetTouches[0];
+      this.updateAngle(clientX, clientY);
+    });
   }
 }
 

@@ -66,9 +66,10 @@ export default class Controls {
   }
 
   events(canvas) {    
-    canvas.addEventListener("touchstart", e => this.checkHangHandle(
-      e.targetTouches[0], 'start')
-    );
+    canvas.addEventListener("touchstart", e => {
+      this.checkHangHandle(e.targetTouches[0], 'start');
+    });
+
     canvas.addEventListener("touchmove", e => this.checkHangHandle(
       e.targetTouches[0], 'move')
     );

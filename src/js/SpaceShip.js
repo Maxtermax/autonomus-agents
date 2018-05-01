@@ -2,6 +2,7 @@ import TextBox from './components/TextBox.js';
 import Explotion from './Explotion.js';
 import { isOverLapping } from './utils/index.js';
 const Shoot = document.getElementById('shoot');
+let now = Date.now();
 
 export default class SpaceShip {
   constructor({ctx, width, height, x, y, color = 'white', id}) {
@@ -17,41 +18,60 @@ export default class SpaceShip {
     this.bound = false;
     this.momentum = 100;
     this.angle = 0;
+    this.dtAngle = 0;
     this.translateOnce = false;
   }
 
   drawShip() {
-    let { width, height, x, y, ctx, color } = this;    
-    ctx.save();
-    if(this.translateOnce === false) {
-      
-      console.log("Once")
+    let { angle, width, height, x, y, ctx, color, viewRange = 80, viewAmplitude = 50 } = this;  
+
+    ctx.save();//save angle
+    ctx.translate(x+(width/2), y+(height/2));
+    if(this.angle) {    
+      if(this.dtAngle <= this.angle) this.dtAngle += 2.4;      
+      if(this.dtAngle >= this.angle) this.dtAngle -= 2.4;         
+      ctx.rotate(this.dtAngle * Math.PI / 180);               
     } 
+    /*
+    let dt = Date.now() - now;
+    if(dt >= 1000) {
+      //console.log("segundo")
+      now = Date.now();
+    }
+    */
+
+    //ctx.beginPath();
+    //ctx.fillStyle = 'blue';
+    //ctx.fillRect(0, 0, 100, 100);
+    //ctx.closePath();
+
+    ctx.beginPath();
+    ctx.fillStyle = color;
+    ctx.fillRect(-(width/2), -(height/2), width, height);
+    ctx.closePath();//ship    
+
+    ctx.beginPath();
+    ctx.strokeStyle = 'white';
+    ctx.lineWidth = 1;    
+    ctx.arc(0, 0, width*1.5, 0, 2 * Math.PI);  
+    ctx.stroke();
+    ctx.closePath();//arc bound 
+
+
+    ctx.beginPath();    
+    ctx.moveTo(0, 0);
+    ctx.lineTo(viewAmplitude, -viewRange);
+    ctx.moveTo(0, 0);
+    ctx.lineTo(-viewAmplitude, -viewRange);
+    ctx.strokeStyle = 'white';
+    ctx.stroke();
+    ctx.closePath();
+
     if(this.bound) {
       //this.angle++
       //ctx.translate(x+(width/2), y+(height/2));
       //ctx.rotate(this.angle * Math.PI / 180);
     }   
-
-    ctx.beginPath();
-    ctx.fillStyle = color;
-    ctx.fillRect(x, y, width, height);
-    ctx.closePath();//ship    
-    
-    ctx.beginPath();
-    ctx.strokeStyle = 'white';
-    ctx.lineWidth = 2;    
-    ctx.arc(x+(width/2), y+(height/2), width*1.5, 0, 2 * Math.PI);  
-    ctx.stroke();
-    ctx.closePath();//arc bound 
-
-    ctx.beginPath();
-    ctx.strokeStyle = 'white';
-    ctx.lineWidth = 2;    
-    ctx.arc(x+(width/2), y-width, 5, 0, 2 * Math.PI);  
-    ctx.fill();
-    ctx.closePath();//orientation
-    ctx.restore();
 
     if(this.bound) {            
       if(this.prevX < this.x) this.x += this.momentum/100;              
@@ -68,6 +88,13 @@ export default class SpaceShip {
       this.prevY = this.y;      
     }
     this.translateOnce = true;
+    ctx.restore();//restore angle
+    
+    ctx.beginPath();
+    ctx.fillStyle = 'green';
+    ctx.fillRect(x+(width/2)-(10/2), y+(height/2)-(10/2), 10, 10);
+    ctx.closePath();          
+
   }
 
   render() {

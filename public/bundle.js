@@ -127,6 +127,16 @@ var Universe = function () {
 
       var game = setInterval(function () {
         (0, _index.clear)(canvas);
+        ctx.save();
+        ctx.beginPath();
+        ctx.lineTo(canvas.width / 2, 0);
+        ctx.lineTo(canvas.width / 2, canvas.height);
+        ctx.moveTo(0, canvas.height / 2);
+        ctx.lineTo(canvas.width, canvas.height / 2);
+        ctx.strokeStyle = 'white';
+        ctx.stroke();
+        ctx.closePath();
+        ctx.restore();
         _this.update();
       }, this.FPS);
     }
@@ -149,13 +159,34 @@ var Universe = function () {
       nav.bound = true;
     }
   }, {
+    key: 'updateAngle',
+    value: function updateAngle(clientX, clientY) {
+      var convertX = clientX - canvas.width / 2;
+      var convertY = canvas.height / 2 - clientY;
+      var nav = this.stage.find('nav');
+      var rad = Math.atan2(convertX, convertY);
+      var deg = rad * (180 / Math.PI);
+      //console.log( `rad: ${ rad }, deg: ${ deg }, x: ${ convertX }, y: ${ convertY }`);
+      nav.angle = deg;
+    }
+  }, {
     key: 'preload',
     value: function preload() {
+      var _this2 = this;
+
       this.stage = new _Stage2.default(canvas, true);
-      var nav = new _SpaceShip2.default({ width: 25, height: 25, x: 200, y: 10, ctx: ctx, color: 'white', id: 'nav' });
+      var nav = new _SpaceShip2.default({ width: 25, height: 25, x: 150, y: 200, ctx: ctx, color: 'white', id: 'nav' });
       this.stage.push(nav);
       var onMove = this.moveEvent.bind(this);
       this.controls = new _Controls2.default({ stage: this.stage, canvas: canvas, onMove: onMove }, true);
+
+      canvas.addEventListener("touchstart", function (e) {
+        var _e$targetTouches$ = e.targetTouches[0],
+            clientX = _e$targetTouches$.clientX,
+            clientY = _e$targetTouches$.clientY;
+
+        _this2.updateAngle(clientX, clientY);
+      });
     }
   }]);
   return Universe;
@@ -2038,6 +2069,7 @@ var _index = __webpack_require__(22);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var Shoot = document.getElementById('shoot');
+var now = Date.now();
 
 var SpaceShip = function () {
   function SpaceShip(_ref) {
@@ -2063,49 +2095,73 @@ var SpaceShip = function () {
     this.bound = false;
     this.momentum = 100;
     this.angle = 0;
+    this.dtAngle = 0;
     this.translateOnce = false;
   }
 
   (0, _createClass3.default)(SpaceShip, [{
     key: 'drawShip',
     value: function drawShip() {
-      var width = this.width,
+      var angle = this.angle,
+          width = this.width,
           height = this.height,
           x = this.x,
           y = this.y,
           ctx = this.ctx,
-          color = this.color;
+          color = this.color,
+          _viewRange = this.viewRange,
+          viewRange = _viewRange === undefined ? 80 : _viewRange,
+          _viewAmplitude = this.viewAmplitude,
+          viewAmplitude = _viewAmplitude === undefined ? 50 : _viewAmplitude;
 
-      ctx.save();
-      if (this.translateOnce === false) {
 
-        console.log("Once");
+      ctx.save(); //save angle
+      ctx.translate(x + width / 2, y + height / 2);
+      if (this.angle) {
+        if (this.dtAngle <= this.angle) this.dtAngle += 2.4;
+        if (this.dtAngle >= this.angle) this.dtAngle -= 2.4;
+        ctx.rotate(this.dtAngle * Math.PI / 180);
       }
+      /*
+      let dt = Date.now() - now;
+      if(dt >= 1000) {
+        //console.log("segundo")
+        now = Date.now();
+      }
+      */
+
+      //ctx.beginPath();
+      //ctx.fillStyle = 'blue';
+      //ctx.fillRect(0, 0, 100, 100);
+      //ctx.closePath();
+
+      ctx.beginPath();
+      ctx.fillStyle = color;
+      ctx.fillRect(-(width / 2), -(height / 2), width, height);
+      ctx.closePath(); //ship    
+
+      ctx.beginPath();
+      ctx.strokeStyle = 'white';
+      ctx.lineWidth = 1;
+      ctx.arc(0, 0, width * 1.5, 0, 2 * Math.PI);
+      ctx.stroke();
+      ctx.closePath(); //arc bound 
+
+
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(viewAmplitude, -viewRange);
+      ctx.moveTo(0, 0);
+      ctx.lineTo(-viewAmplitude, -viewRange);
+      ctx.strokeStyle = 'white';
+      ctx.stroke();
+      ctx.closePath();
+
       if (this.bound) {
         //this.angle++
         //ctx.translate(x+(width/2), y+(height/2));
         //ctx.rotate(this.angle * Math.PI / 180);
       }
-
-      ctx.beginPath();
-      ctx.fillStyle = color;
-      ctx.fillRect(x, y, width, height);
-      ctx.closePath(); //ship    
-
-      ctx.beginPath();
-      ctx.strokeStyle = 'white';
-      ctx.lineWidth = 2;
-      ctx.arc(x + width / 2, y + height / 2, width * 1.5, 0, 2 * Math.PI);
-      ctx.stroke();
-      ctx.closePath(); //arc bound 
-
-      ctx.beginPath();
-      ctx.strokeStyle = 'white';
-      ctx.lineWidth = 2;
-      ctx.arc(x + width / 2, y - width, 5, 0, 2 * Math.PI);
-      ctx.fill();
-      ctx.closePath(); //orientation
-      ctx.restore();
 
       if (this.bound) {
         if (this.prevX < this.x) this.x += this.momentum / 100;
@@ -2122,6 +2178,12 @@ var SpaceShip = function () {
         this.prevY = this.y;
       }
       this.translateOnce = true;
+      ctx.restore(); //restore angle
+
+      ctx.beginPath();
+      ctx.fillStyle = 'green';
+      ctx.fillRect(x + width / 2 - 10 / 2, y + height / 2 - 10 / 2, 10, 10);
+      ctx.closePath();
     }
   }, {
     key: 'render',
@@ -2331,8 +2393,9 @@ var Controls = function () {
       var _this = this;
 
       canvas.addEventListener("touchstart", function (e) {
-        return _this.checkHangHandle(e.targetTouches[0], 'start');
+        _this.checkHangHandle(e.targetTouches[0], 'start');
       });
+
       canvas.addEventListener("touchmove", function (e) {
         return _this.checkHangHandle(e.targetTouches[0], 'move');
       });
