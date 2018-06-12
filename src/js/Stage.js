@@ -1,4 +1,5 @@
 import { calcCenter, getRandomInt } from './utils/index.js';
+import TexBox from './components/TextBox.js';
 const scale = 0.8;
 export default class Stage {
   constructor(canvas, debug = false) {
@@ -10,22 +11,24 @@ export default class Stage {
     let calc = calcCenter({width, height, x, y},{width: this.width, height: this.height});
     this.x = calc.x;
     this.y = 0;
-    this.elements = [];
+    this.layers = [
+      new TexBox(this.ctx, 10, 20, 'deg: 0, x: 0, y: 0', '12px arial', true, 'info')
+    ]
   }
 
-  push(element) {
-    this.elements.push(element);
+  push(layer) {
+    this.layers.push(layer);
   }
 
   find(id = '') {
-    return this.elements.find(item => item.id === id);    
+    return this.layers.find(item => item.id === id);    
   }
 
   render(midlewares = []) {
-    let { ctx, x, y, width, height, elements, debug } = this;
-    elements.forEach((element, index, entire) => {
-      midlewares.forEach(midleware => midleware(element, index, entire));
-      element.render();
+    let { ctx, x, y, width, height, layers, debug } = this;
+    layers.forEach((layer, index, entire) => {
+      midlewares.forEach(midleware => midleware(layer, index, entire));
+      layer.render();
     })
     if(debug) {
         ctx.beginPath();

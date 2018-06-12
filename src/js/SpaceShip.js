@@ -20,6 +20,7 @@ export default class SpaceShip {
     this.angle = 0;
     this.dtAngle = 0;
     this.translateOnce = false;
+    this.info = new TextBox(ctx, x, y, 'deg: 0, x:0, y:0', '12px arial', true, id = 'info');
   }
 
   drawShip() {
@@ -28,8 +29,8 @@ export default class SpaceShip {
     ctx.save();//save angle
     ctx.translate(x+(width/2), y+(height/2));
     if(this.angle) {    
-      if(this.dtAngle <= this.angle) this.dtAngle += 2.4;      
-      if(this.dtAngle >= this.angle) this.dtAngle -= 2.4;         
+      if(this.dtAngle <= this.angle) this.dtAngle += 4;      
+      if(this.dtAngle >= this.angle) this.dtAngle -= 4;         
       ctx.rotate(this.dtAngle * Math.PI / 180);               
     } 
     /*
@@ -93,8 +94,11 @@ export default class SpaceShip {
     ctx.beginPath();
     ctx.fillStyle = 'green';
     ctx.fillRect(x+(width/2)-(10/2), y+(height/2)-(10/2), 10, 10);
-    ctx.closePath();          
-
+    ctx.closePath();
+    this.info.x = this.x;
+    this.info.y = this.y;  
+    this.info.data = `deg: ${ Math.floor(this.dtAngle) }, x: ${ Math.floor(this.x)-this.width }, y: ${ Math.floor(this.y) }`;       
+    this.info.render(); 
   }
 
   render() {

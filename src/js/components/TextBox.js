@@ -1,9 +1,10 @@
 export default class TextBox {
-  constructor(ctx, x, y, data = '', font = '12px arial', display = false) {
+  constructor(ctx, x, y, data = '', font = '12px arial', display = false, id = '') {
     this.ctx = ctx;
     this.font = font;
     this.x = x;
     this.y = y;
+    this.id = id;
     this.data = data;
     this.display = display;
   }
