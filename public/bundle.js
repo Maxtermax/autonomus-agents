@@ -988,6 +988,10 @@ var _Explotion = __webpack_require__(91);
 
 var _Explotion2 = _interopRequireDefault(_Explotion);
 
+var _Vector = __webpack_require__(118);
+
+var _Vector2 = _interopRequireDefault(_Vector);
+
 var _index = __webpack_require__(16);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -1022,6 +1026,7 @@ var SpaceShip = function () {
     this.dtAngle = 0;
     this.translateOnce = false;
     this.info = new _TextBox2.default(ctx, x, y, 'deg: 0, x:0, y:0', '12px arial', true, id = 'info');
+    this.vector = new _Vector2.default({ ctx: ctx, x: 0, y: 0, magnitude: -45, direction: 0 });
   }
 
   (0, _createClass3.default)(SpaceShip, [{
@@ -1072,8 +1077,8 @@ var SpaceShip = function () {
       ctx.stroke();
       ctx.closePath(); //arc bound 
 
-
-      ctx.beginPath();
+      /* 
+      ctx.beginPath();    
       ctx.moveTo(0, 0);
       ctx.lineTo(viewAmplitude, -viewRange);
       ctx.moveTo(0, 0);
@@ -1081,7 +1086,7 @@ var SpaceShip = function () {
       ctx.strokeStyle = 'white';
       ctx.stroke();
       ctx.closePath();
-
+      */
       if (this.bound) {
         //this.angle++
         //ctx.translate(x+(width/2), y+(height/2));
@@ -1103,14 +1108,11 @@ var SpaceShip = function () {
         this.prevY = this.y;
       }
       this.translateOnce = true;
+      this.vector.render();
       ctx.restore(); //restore angle
 
-      ctx.beginPath();
-      ctx.fillStyle = 'green';
-      ctx.fillRect(x + width / 2 - 10 / 2, y + height / 2 - 10 / 2, 10, 10);
-      ctx.closePath();
-      this.info.x = this.x;
-      this.info.y = this.y;
+      this.info.x = this.x + this.width / 2;
+      this.info.y = this.y + this.height;
       this.info.data = 'deg: ' + Math.floor(this.dtAngle) + ', x: ' + (Math.floor(this.x) - this.width) + ', y: ' + Math.floor(this.y);
       this.info.render();
     }
@@ -1224,34 +1226,75 @@ var Universe = function () {
     value: function moveEvent(handler) {
       var momentumX = handler.x - handler.pivot.x;
       var momentumY = handler.y - handler.pivot.y;
-      var nav1 = this.stage.find('nav1');
-      nav1.prevX = nav1.x;
-      nav1.prevY = nav1.y;
-      nav1.x += momentumX / 10;
-      nav1.y += momentumY / 10;
-      nav1.bound = true;
-
-      var nav2 = this.stage.find('nav2');
-      nav2.prevX = nav2.x + 100;
-      nav2.prevY = nav2.y + 50;
-      nav2.x += momentumX / 10;
-      nav2.y += momentumY / 10;
-      nav2.bound = true;
+      var nav = this.stage.find('nav');
+      nav.prevX = nav.x;
+      nav.x += momentumX / 10;
+      nav.y += momentumY / 10;
+      nav.bound = true;
     }
   }, {
     key: 'updateAngle',
     value: function updateAngle(clientX, clientY) {
-      var convertX = clientX - canvas.width / 2;
-      var convertY = canvas.height / 2 - clientY;
-      var nav1 = this.stage.find('nav1');
-      var nav2 = this.stage.find('nav2');
+      var _calcCartesiano = this.calcCartesiano(clientX, clientY),
+          x = _calcCartesiano.x,
+          y = _calcCartesiano.y;
+
+      var nav = this.stage.find('nav');
       var info = this.stage.find('info');
-      var rad = Math.atan2(convertX, convertY);
+      var deg = this.coordidatesToDeg(x, y);
+      var message = 'deg: ' + Math.floor(deg) + ', x: ' + x + ', y: ' + y;
+      info.data = message;
+      nav.angle = deg;
+    }
+  }, {
+    key: 'moveVectorNav',
+    value: function moveVectorNav() {
+      var deg = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+
+      var nav = this.stage.find('nav');
+      nav.vector.direction = deg;
+    }
+  }, {
+    key: 'getMousePos',
+    value: function getMousePos(canvas, evt) {
+      var rect = canvas.getBoundingClientRect();
+      return {
+        x: evt.clientX - rect.left,
+        y: evt.clientY - rect.top
+      };
+    }
+  }, {
+    key: 'calcCartesiano',
+    value: function calcCartesiano(candidateX, candidateY) {
+      var x = canvas.width / 2 - candidateX;
+      var y = canvas.height / 2 - candidateY;
+      return { x: x, y: y };
+    }
+  }, {
+    key: 'coordidatesToDeg',
+    value: function coordidatesToDeg(x, y) {
+      var rad = Math.atan2(x, y);
       var deg = rad * (180 / Math.PI);
-      console.log('rad: ' + rad + ', deg: ' + deg + ', x: ' + convertX + ', y: ' + convertY);
-      info.data = 'deg: ' + Math.floor(deg) + ', x: ' + clientX + ', y: ' + clientY;
-      nav1.angle = deg;
-      nav2.angle = deg;
+      return -deg;
+    }
+  }, {
+    key: 'markSpot',
+    value: function markSpot(e) {
+      if (e.targetTouches) {
+        var _e$targetTouches$ = e.targetTouches[0],
+            clientX = _e$targetTouches$.clientX,
+            clientY = _e$targetTouches$.clientY;
+
+        this.addSpot(clientX, clientY);
+        this.updateAngle(clientX, clientY);
+      } else {
+        var _getMousePos = this.getMousePos(canvas, e),
+            x = _getMousePos.x,
+            y = _getMousePos.y;
+
+        this.addSpot(x, y);
+        this.updateAngle(x, y);
+      }
     }
   }, {
     key: 'preload',
@@ -1259,24 +1302,33 @@ var Universe = function () {
       var _this2 = this;
 
       this.stage = new _Stage2.default(canvas, true);
-      var nav1 = new _SpaceShip2.default({ width: 25, height: 25, x: 150, y: 200, ctx: ctx, color: 'white', id: 'nav1' });
-      var nav2 = new _SpaceShip2.default({ width: 25, height: 25, x: 150, y: 200, ctx: ctx, color: 'white', id: 'nav2' });
-      this.stage.push(nav1);
-      this.stage.push(nav2);
-      var onMove = this.moveEvent.bind(this);
-      this.controls = new _Controls2.default({ stage: this.stage, canvas: canvas, onMove: onMove }, true);
-      canvas.addEventListener("touchstart", function (e) {
-        var _e$targetTouches$ = e.targetTouches[0],
-            clientX = _e$targetTouches$.clientX,
-            clientY = _e$targetTouches$.clientY;
 
-        _this2.randomPoints(clientX, clientY);
-        _this2.updateAngle(clientX, clientY);
+      var _calcCartesiano2 = this.calcCartesiano(0, 0),
+          x = _calcCartesiano2.x,
+          y = _calcCartesiano2.y;
+
+      var nav = new _SpaceShip2.default({ width: 25, height: 25, x: x, y: y, ctx: ctx, color: 'white', id: 'nav' });
+      this.stage.push(nav);
+      var onMove = this.moveEvent.bind(this);
+      canvas.addEventListener('mousemove', function (e) {
+        var mousePos = _this2.getMousePos(canvas, e);
+        var calc = _this2.calcCartesiano(mousePos.x, mousePos.y);
+        //console.log(calc) 
+        var deg = _this2.coordidatesToDeg(calc.x, calc.y);
+        //console.log(deg)
+
+        var magnitude = _this2.stage.find('nav').vector.magnitude;
+
+        _this2.moveVectorNav(deg / -magnitude);
       });
+
+      this.controls = new _Controls2.default({ stage: this.stage, canvas: canvas, onMove: onMove }, true);
+      canvas.addEventListener("touchstart", this.markSpot.bind(this));
+      canvas.addEventListener("mouseup", this.markSpot.bind(this));
     }
   }, {
-    key: 'randomPoints',
-    value: function randomPoints(x, y) {
+    key: 'addSpot',
+    value: function addSpot(x, y) {
       var spot = new _Spot2.default({ x: x, y: y, ctx: ctx, display: true, size: 10 });
       this.stage.layers.push(spot);
     }
@@ -2663,6 +2715,115 @@ var Spot = function () {
 }();
 
 exports.default = Spot;
+
+/***/ }),
+/* 96 */,
+/* 97 */,
+/* 98 */,
+/* 99 */,
+/* 100 */,
+/* 101 */,
+/* 102 */,
+/* 103 */,
+/* 104 */,
+/* 105 */,
+/* 106 */,
+/* 107 */,
+/* 108 */,
+/* 109 */,
+/* 110 */,
+/* 111 */,
+/* 112 */,
+/* 113 */,
+/* 114 */,
+/* 115 */,
+/* 116 */,
+/* 117 */,
+/* 118 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = undefined;
+
+var _classCallCheck2 = __webpack_require__(2);
+
+var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+
+var _createClass2 = __webpack_require__(6);
+
+var _createClass3 = _interopRequireDefault(_createClass2);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var Vector = function () {
+  function Vector(_ref) {
+    var ctx = _ref.ctx,
+        x = _ref.x,
+        y = _ref.y,
+        magnitude = _ref.magnitude,
+        _ref$direction = _ref.direction,
+        direction = _ref$direction === undefined ? 0 : _ref$direction;
+    (0, _classCallCheck3.default)(this, Vector);
+
+    this.ctx = ctx;
+    this.x = x;
+    this.y = y;
+    this.magnitude = magnitude;
+    this.direction = direction;
+  }
+
+  (0, _createClass3.default)(Vector, [{
+    key: 'drawHead',
+    value: function drawHead() {
+      var ctx = this.ctx,
+          magnitude = this.magnitude,
+          direction = this.direction,
+          x = this.x,
+          y = this.y;
+
+      ctx.fillStyle = 'red';
+      var size = 5;
+      ctx.beginPath();
+      ctx.lineWidth = 1;
+      ctx.lineTo(x - size, y + magnitude);
+      ctx.lineTo(x + size, y + magnitude);
+      ctx.lineTo(x, y + magnitude - size * 2); //right close 
+      ctx.lineTo(x - size, y + magnitude); //left close
+      ctx.fill();
+      ctx.closePath();
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      var ctx = this.ctx,
+          magnitude = this.magnitude,
+          direction = this.direction,
+          x = this.x,
+          y = this.y;
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.rotate(direction);
+      ctx.lineTo(x, y);
+      ctx.lineTo(x, y + magnitude);
+      ctx.strokeStyle = 'red';
+      ctx.lineCap = "round";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      this.drawHead();
+      ctx.closePath();
+      ctx.restore();
+    }
+  }]);
+  return Vector;
+}();
+
+exports.default = Vector;
 
 /***/ })
 /******/ ]);

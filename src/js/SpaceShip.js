@@ -1,5 +1,6 @@
 import TextBox from './components/TextBox.js';
 import Explotion from './Explotion.js';
+import Vector from './components/Vector.js';
 import { isOverLapping } from './utils/index.js';
 const Shoot = document.getElementById('shoot');
 let now = Date.now();
@@ -21,6 +22,7 @@ export default class SpaceShip {
     this.dtAngle = 0;
     this.translateOnce = false;
     this.info = new TextBox(ctx, x, y, 'deg: 0, x:0, y:0', '12px arial', true, id = 'info');
+    this.vector = new Vector({ctx, x: 0, y:0, magnitude: -45, direction: 0});
   }
 
   drawShip() {
@@ -58,7 +60,7 @@ export default class SpaceShip {
     ctx.stroke();
     ctx.closePath();//arc bound 
 
-
+    /* 
     ctx.beginPath();    
     ctx.moveTo(0, 0);
     ctx.lineTo(viewAmplitude, -viewRange);
@@ -67,7 +69,7 @@ export default class SpaceShip {
     ctx.strokeStyle = 'white';
     ctx.stroke();
     ctx.closePath();
-
+    */
     if(this.bound) {
       //this.angle++
       //ctx.translate(x+(width/2), y+(height/2));
@@ -89,14 +91,11 @@ export default class SpaceShip {
       this.prevY = this.y;      
     }
     this.translateOnce = true;
+    this.vector.render();
     ctx.restore();//restore angle
     
-    ctx.beginPath();
-    ctx.fillStyle = 'green';
-    ctx.fillRect(x+(width/2)-(10/2), y+(height/2)-(10/2), 10, 10);
-    ctx.closePath();
-    this.info.x = this.x;
-    this.info.y = this.y;  
+    this.info.x = this.x+(this.width/2);
+    this.info.y = this.y+(this.height);  
     this.info.data = `deg: ${ Math.floor(this.dtAngle) }, x: ${ Math.floor(this.x)-this.width }, y: ${ Math.floor(this.y) }`;       
     this.info.render(); 
   }
