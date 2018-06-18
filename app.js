@@ -10,6 +10,6 @@ app.get('/', (req, res) => {
   res.sendFile(path.resolve(__dirname, './index.html'));
 })
 
-app.listen(3009, 'localhost', () => {
+app.listen(3009, '192.168.1.17', () => {
   console.log(`Listen on port: ${PORT}`);
 })
