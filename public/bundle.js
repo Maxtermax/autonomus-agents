@@ -997,6 +997,10 @@ var _Explotion = __webpack_require__(91);
 
 var _Explotion2 = _interopRequireDefault(_Explotion);
 
+var _Vector = __webpack_require__(102);
+
+var _Vector2 = _interopRequireDefault(_Vector);
+
 var _index = __webpack_require__(16);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -1031,6 +1035,7 @@ var SpaceShip = function () {
     this.dtAngle = 0;
     this.translateOnce = false;
     this.info = new _TextBox2.default(ctx, x, y, 'deg: 0, x:0, y:0', '12px arial', true, id = 'info');
+    this.vector = new _Vector2.default({ ctx: ctx, x: 0, y: 0, magnitude: -45, direction: 0 });
   }
 
   (0, _createClass3.default)(SpaceShip, [{
@@ -1081,8 +1086,8 @@ var SpaceShip = function () {
       ctx.stroke();
       ctx.closePath(); //arc bound 
 
-
-      ctx.beginPath();
+      /* 
+      ctx.beginPath();    
       ctx.moveTo(0, 0);
       ctx.lineTo(viewAmplitude, -viewRange);
       ctx.moveTo(0, 0);
@@ -1090,7 +1095,7 @@ var SpaceShip = function () {
       ctx.strokeStyle = 'white';
       ctx.stroke();
       ctx.closePath();
-
+      */
       if (this.bound) {
         //this.angle++
         //ctx.translate(x+(width/2), y+(height/2));
@@ -1112,21 +1117,12 @@ var SpaceShip = function () {
         this.prevY = this.y;
       }
       this.translateOnce = true;
+      this.vector.render();
       ctx.restore(); //restore angle
 
-      ctx.beginPath();
-      ctx.fillStyle = 'green';
-      ctx.fillRect(x + width / 2 - 10 / 2, y + height / 2 - 10 / 2, 10, 10);
-      ctx.closePath();
-
-      ctx.beginPath();
-      ctx.strokeStyle = 'red';
-      ctx.strokeRect(x + width / 2 - width / 2, y + height / 2 - height / 2, width, height);
-      ctx.closePath();
-
-      this.info.x = this.x;
-      this.info.y = this.y;
-      this.info.data = 'deg: ' + Math.floor(this.dtAngle) + ', x: ' + (Math.floor(this.x) - this.width) + ', y: ' + Math.floor(this.y);
+      this.info.x = this.x + this.width / 2;
+      this.info.y = this.y + this.height;
+      this.info.data = 'deg: ' + Math.floor(this.dtAngle) + ', x: ' + Math.floor(this.x) + ', y: ' + Math.floor(this.y);
       this.info.render();
     }
   }, {
@@ -1161,10 +1157,6 @@ module.exports = __webpack_require__(95);
 
 "use strict";
 
-
-var _assign = __webpack_require__(98);
-
-var _assign2 = _interopRequireDefault(_assign);
 
 var _classCallCheck2 = __webpack_require__(0);
 
@@ -1267,42 +1259,73 @@ var Universe = function () {
       var momentumY = handler.y - handler.pivot.y;
       var nav = this.stage.find('nav');
       nav.prevX = nav.x;
-      nav.prevY = nav.y;
       nav.x += momentumX / 10;
       nav.y += momentumY / 10;
       nav.bound = true;
-      var width = canvas.width * 0.9;
-      var height = canvas.height * 0.9;
-      canvas.x = 0;
-      canvas.y = 0;
-
-      var _calcCenter2 = (0, _index.calcCenter)(canvas, { height: height, width: width }),
-          x = _calcCenter2.x,
-          y = _calcCenter2.y;
-
-      var isOnBounds = (0, _index.isCollide)('square', (0, _assign2.default)({}, nav, {
-        width: nav.width * 2.5 - (canvas.width - width),
-        height: nav.height * 2.5 - (canvas.height - height)
-      }), {
-        x: x,
-        y: y,
-        width: width,
-        height: height
-      });
-      console.log(!isOnBounds);
     }
   }, {
     key: 'updateAngle',
     value: function updateAngle(clientX, clientY) {
-      var convertX = clientX - canvas.width / 2;
-      var convertY = canvas.height / 2 - clientY;
+      var _calcCartesiano = this.calcCartesiano(clientX, clientY),
+          x = _calcCartesiano.x,
+          y = _calcCartesiano.y;
+
       var nav = this.stage.find('nav');
       var info = this.stage.find('info');
-      var rad = Math.atan2(convertX, convertY);
-      var deg = rad * (180 / Math.PI);
-      //console.log( `rad: ${ rad }, deg: ${ deg }, x: ${ convertX }, y: ${ convertY }`);     
-      info.data = 'deg: ' + Math.floor(deg) + ', x: ' + clientX + ', y: ' + clientY;
+      var deg = this.coordidatesToDeg(x, y);
+      var message = 'deg: ' + Math.floor(deg) + ', x: ' + x + ', y: ' + y;
+      info.data = message;
       nav.angle = deg;
+    }
+  }, {
+    key: 'moveVectorNav',
+    value: function moveVectorNav() {
+      var deg = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+
+      var nav = this.stage.find('nav');
+      nav.vector.direction = deg;
+    }
+  }, {
+    key: 'getMousePos',
+    value: function getMousePos(canvas, evt) {
+      var rect = canvas.getBoundingClientRect();
+      return {
+        x: evt.clientX - rect.left,
+        y: evt.clientY - rect.top
+      };
+    }
+  }, {
+    key: 'calcCartesiano',
+    value: function calcCartesiano(candidateX, candidateY) {
+      var x = -candidateX + canvas.width / 2;
+      var y = canvas.height / 2 - candidateY;
+      return { x: x, y: y };
+    }
+  }, {
+    key: 'coordidatesToDeg',
+    value: function coordidatesToDeg(x, y) {
+      var rad = Math.atan2(x, y);
+      var deg = rad * (180 / Math.PI);
+      return -deg;
+    }
+  }, {
+    key: 'markSpot',
+    value: function markSpot(e) {
+      if (e.targetTouches) {
+        var _e$targetTouches$ = e.targetTouches[0],
+            clientX = _e$targetTouches$.clientX,
+            clientY = _e$targetTouches$.clientY;
+
+        this.addSpot(clientX, clientY);
+        this.updateAngle(clientX, clientY);
+      } else {
+        var _getMousePos = this.getMousePos(canvas, e),
+            x = _getMousePos.x,
+            y = _getMousePos.y;
+
+        this.addSpot(x, y);
+        this.updateAngle(x, y);
+      }
     }
   }, {
     key: 'preload',
@@ -1310,23 +1333,33 @@ var Universe = function () {
       var _this2 = this;
 
       this.stage = new _Stage2.default(canvas, true);
-      var nav = new _SpaceShip2.default({ width: 25, height: 25, x: 200, y: 200, ctx: ctx, color: 'white', id: 'nav' });
+
+      var _calcCartesiano2 = this.calcCartesiano(50, 0),
+          x = _calcCartesiano2.x,
+          y = _calcCartesiano2.y;
+
+      var nav = new _SpaceShip2.default({ width: 25, height: 25, x: x, y: y, ctx: ctx, color: 'white', id: 'nav' });
       this.stage.push(nav);
       var onMove = this.moveEvent.bind(this);
-      this.controls = new _Controls2.default({ stage: this.stage, canvas: canvas, onMove: onMove }, true);
+      canvas.addEventListener('mousemove', function (e) {
+        var mousePos = _this2.getMousePos(canvas, e);
+        var calc = _this2.calcCartesiano(mousePos.x, mousePos.y);
+        //console.log(calc) 
+        var deg = _this2.coordidatesToDeg(calc.x, calc.y);
+        //console.log(deg)
 
-      canvas.addEventListener("touchstart", function (e) {
-        var _e$targetTouches$ = e.targetTouches[0],
-            clientX = _e$targetTouches$.clientX,
-            clientY = _e$targetTouches$.clientY;
+        var magnitude = _this2.stage.find('nav').vector.magnitude;
 
-        _this2.randomPoints(clientX, clientY);
-        _this2.updateAngle(clientX, clientY);
+        _this2.moveVectorNav(deg / -magnitude);
       });
+
+      this.controls = new _Controls2.default({ stage: this.stage, canvas: canvas, onMove: onMove }, true);
+      canvas.addEventListener("touchstart", this.markSpot.bind(this));
+      //canvas.addEventListener("mouseup", this.markSpot.bind(this));
     }
   }, {
-    key: 'randomPoints',
-    value: function randomPoints(x, y) {
+    key: 'addSpot',
+    value: function addSpot(x, y) {
       var spot = new _Spot2.default({ x: x, y: y, ctx: ctx, display: true, size: 10 });
       this.stage.layers.push(spot);
     }
@@ -2558,15 +2591,28 @@ var Controls = function () {
     value: function events(canvas) {
       var _this = this;
 
-      canvas.addEventListener("touchstart", function (e) {
+      canvas.addEventListener('mousedown', function (e) {
+        _this.handle.handle = true;
+        _this.checkHangHandle(e, 'start');
+      });
+
+      canvas.addEventListener('touchstart', function (e) {
         _this.checkHangHandle(e.targetTouches[0], 'start');
       });
 
-      canvas.addEventListener("touchmove", function (e) {
+      canvas.addEventListener('touchmove', function (e) {
         return _this.checkHangHandle(e.targetTouches[0], 'move');
       });
-      canvas.addEventListener("touchend", function (e) {
+      canvas.addEventListener('mousemove', function (e) {
+        return _this.handle.handle ? _this.checkHangHandle(e, 'move') : null;
+      });
+
+      canvas.addEventListener('touchend', function (e) {
         return _this.checkHangHandle(null, 'end');
+      });
+      canvas.addEventListener('mouseup', function (e) {
+        _this.handle.handle = false;
+        _this.checkHangHandle(null, 'end');
       });
       //touchEvents(canvas, 'drag', this.checkHangHandle.bind(this))
     }
@@ -2782,69 +2828,95 @@ exports.default = Mask;
 
 /***/ }),
 /* 97 */,
-/* 98 */
-/***/ (function(module, exports, __webpack_require__) {
-
-module.exports = { "default": __webpack_require__(99), __esModule: true };
-
-/***/ }),
-/* 99 */
-/***/ (function(module, exports, __webpack_require__) {
-
-__webpack_require__(100);
-module.exports = __webpack_require__(2).Object.assign;
-
-
-/***/ }),
-/* 100 */
-/***/ (function(module, exports, __webpack_require__) {
-
-// 19.1.3.1 Object.assign(target, source)
-var $export = __webpack_require__(7);
-
-$export($export.S + $export.F, 'Object', { assign: __webpack_require__(101) });
-
-
-/***/ }),
-/* 101 */
+/* 98 */,
+/* 99 */,
+/* 100 */,
+/* 101 */,
+/* 102 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-// 19.1.2.1 Object.assign(target, source, ...)
-var getKeys = __webpack_require__(25);
-var gOPS = __webpack_require__(42);
-var pIE = __webpack_require__(30);
-var toObject = __webpack_require__(35);
-var IObject = __webpack_require__(64);
-var $assign = Object.assign;
 
-// should work with symbols and should have deterministic property order (V8 bug)
-module.exports = !$assign || __webpack_require__(13)(function () {
-  var A = {};
-  var B = {};
-  // eslint-disable-next-line no-undef
-  var S = Symbol();
-  var K = 'abcdefghijklmnopqrst';
-  A[S] = 7;
-  K.split('').forEach(function (k) { B[k] = k; });
-  return $assign({}, A)[S] != 7 || Object.keys($assign({}, B)).join('') != K;
-}) ? function assign(target, source) { // eslint-disable-line no-unused-vars
-  var T = toObject(target);
-  var aLen = arguments.length;
-  var index = 1;
-  var getSymbols = gOPS.f;
-  var isEnum = pIE.f;
-  while (aLen > index) {
-    var S = IObject(arguments[index++]);
-    var keys = getSymbols ? getKeys(S).concat(getSymbols(S)) : getKeys(S);
-    var length = keys.length;
-    var j = 0;
-    var key;
-    while (length > j) if (isEnum.call(S, key = keys[j++])) T[key] = S[key];
-  } return T;
-} : $assign;
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = undefined;
 
+var _classCallCheck2 = __webpack_require__(0);
+
+var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+
+var _createClass2 = __webpack_require__(3);
+
+var _createClass3 = _interopRequireDefault(_createClass2);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var Vector = function () {
+  function Vector(_ref) {
+    var ctx = _ref.ctx,
+        x = _ref.x,
+        y = _ref.y,
+        magnitude = _ref.magnitude,
+        _ref$direction = _ref.direction,
+        direction = _ref$direction === undefined ? 0 : _ref$direction;
+    (0, _classCallCheck3.default)(this, Vector);
+
+    this.ctx = ctx;
+    this.x = x;
+    this.y = y;
+    this.magnitude = magnitude;
+    this.direction = direction;
+  }
+
+  (0, _createClass3.default)(Vector, [{
+    key: 'drawHead',
+    value: function drawHead() {
+      var ctx = this.ctx,
+          magnitude = this.magnitude,
+          direction = this.direction,
+          x = this.x,
+          y = this.y;
+
+      ctx.fillStyle = 'red';
+      var size = 5;
+      ctx.beginPath();
+      ctx.lineWidth = 1;
+      ctx.lineTo(x - size, y + magnitude);
+      ctx.lineTo(x + size, y + magnitude);
+      ctx.lineTo(x, y + magnitude - size * 2); //right close 
+      ctx.lineTo(x - size, y + magnitude); //left close
+      ctx.fill();
+      ctx.closePath();
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      var ctx = this.ctx,
+          magnitude = this.magnitude,
+          direction = this.direction,
+          x = this.x,
+          y = this.y;
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.rotate(direction);
+      ctx.lineTo(x, y);
+      ctx.lineTo(x, y + magnitude);
+      ctx.strokeStyle = 'red';
+      ctx.lineCap = "round";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      this.drawHead();
+      ctx.closePath();
+      ctx.restore();
+    }
+  }]);
+  return Vector;
+}();
+
+exports.default = Vector;
 
 /***/ })
 /******/ ]);

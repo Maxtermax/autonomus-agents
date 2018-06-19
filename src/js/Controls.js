@@ -66,16 +66,23 @@ export default class Controls {
   }
 
   events(canvas) {    
-    canvas.addEventListener("touchstart", e => {
+    canvas.addEventListener('mousedown', e => {
+      this.handle.handle = true;
+      this.checkHangHandle(e, 'start');
+    });
+
+    canvas.addEventListener('touchstart', e => {
       this.checkHangHandle(e.targetTouches[0], 'start');
     });
 
-    canvas.addEventListener("touchmove", e => this.checkHangHandle(
-      e.targetTouches[0], 'move')
-    );
-    canvas.addEventListener("touchend", e => 
+    canvas.addEventListener('touchmove', e => this.checkHangHandle(e.targetTouches[0], 'move'));
+    canvas.addEventListener('mousemove', e => this.handle.handle ? this.checkHangHandle(e, 'move') : null);
+
+    canvas.addEventListener('touchend', e => this.checkHangHandle(null, 'end'));
+    canvas.addEventListener('mouseup', e => {
+      this.handle.handle = false;
       this.checkHangHandle(null, 'end')
-    );
+    });    
     //touchEvents(canvas, 'drag', this.checkHangHandle.bind(this))
   }
 
