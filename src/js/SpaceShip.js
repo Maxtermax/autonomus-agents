@@ -21,7 +21,7 @@ export default class SpaceShip {
     this.angle = 0;
     this.dtAngle = 0;
     this.translateOnce = false;
-    this.info = new TextBox(ctx, x, y, 'deg: 0, x:0, y:0', '12px arial', true, id = 'info');
+    //this.info = new TextBox(ctx, x, y, 'deg: 0, x:0, y:0', '12px arial', true, id = 'info');
     this.vector = new Vector({ctx, x: 0, y:0, magnitude: -45, direction: 0});
   }
 
@@ -93,11 +93,12 @@ export default class SpaceShip {
     this.translateOnce = true;
     this.vector.render();
     ctx.restore();//restore angle
-    
+    /*
     this.info.x = this.x+(this.width/2);
     this.info.y = this.y+(this.height);  
-    this.info.data = `deg: ${ Math.floor(this.dtAngle) }, x: ${ Math.floor(this.x) }, y: ${ Math.floor(this.y) }`;       
+    this.info.data = `deg: ${ Math.floor(this.dtAngle) }, x: ${ Math.floor(this.x) }, y: ${ Math.floor(this.y) }`;           
     this.info.render(); 
+    */
   }
 
   render() {

@@ -1034,7 +1034,7 @@ var SpaceShip = function () {
     this.angle = 0;
     this.dtAngle = 0;
     this.translateOnce = false;
-    this.info = new _TextBox2.default(ctx, x, y, 'deg: 0, x:0, y:0', '12px arial', true, id = 'info');
+    //this.info = new TextBox(ctx, x, y, 'deg: 0, x:0, y:0', '12px arial', true, id = 'info');
     this.vector = new _Vector2.default({ ctx: ctx, x: 0, y: 0, magnitude: -45, direction: 0 });
   }
 
@@ -1119,11 +1119,12 @@ var SpaceShip = function () {
       this.translateOnce = true;
       this.vector.render();
       ctx.restore(); //restore angle
-
-      this.info.x = this.x + this.width / 2;
-      this.info.y = this.y + this.height;
-      this.info.data = 'deg: ' + Math.floor(this.dtAngle) + ', x: ' + Math.floor(this.x) + ', y: ' + Math.floor(this.y);
-      this.info.render();
+      /*
+      this.info.x = this.x+(this.width/2);
+      this.info.y = this.y+(this.height);  
+      this.info.data = `deg: ${ Math.floor(this.dtAngle) }, x: ${ Math.floor(this.x) }, y: ${ Math.floor(this.y) }`;           
+      this.info.render(); 
+      */
     }
   }, {
     key: 'render',
@@ -1214,15 +1215,78 @@ var Universe = function () {
         (0, _index.clear)(canvas);
         ctx.save();
         ctx.beginPath();
-        ctx.lineTo(canvas.width / 2, 0);
-        ctx.lineTo(canvas.width / 2, canvas.height);
-        ctx.moveTo(0, canvas.height / 2);
-        ctx.lineTo(canvas.width, canvas.height / 2);
-        ctx.strokeStyle = 'white';
-        ctx.stroke();
-        ctx.restore();
+        var x = canvas.width / 2;
+        var y = canvas.height / 2;
+        ctx.translate(x, y);
+        //ctx.rotate(180 * Math.PI / 180);
+        //ctx.scale(-1, 1);
+        _this.drawCroos();
         _this.update();
+        ctx.closePath();
+        ctx.restore();
       }, this.FPS);
+    }
+  }, {
+    key: 'drawVerticalSpot',
+    value: function drawVerticalSpot() {
+      var height = canvas.height / 2;
+      var padding = 15;
+      var total = Math.floor(height / padding);
+
+      for (var i = 0; i < total; i++) {
+        var width = -(canvas.height / 2) + i * padding;
+        ctx.fillStyle = 'white';
+        ctx.moveTo(0, width);
+        ctx.lineTo(padding, width);
+        ctx.font = '10px arial';
+        ctx.fillText('' + (total - i), padding + 5, width + 5);
+      }
+
+      for (var _i = 1; _i < total; _i++) {
+        var _width = _i * padding;
+        ctx.fillStyle = 'red';
+        ctx.moveTo(0, _width);
+        ctx.lineTo(padding, _width);
+        ctx.font = '10px arial';
+        ctx.fillText('' + -_i, padding + 5, _width + 5);
+      }
+    }
+  }, {
+    key: 'drawHorizontalSpot',
+    value: function drawHorizontalSpot() {
+      var width = canvas.width / 2;
+      var padding = 15;
+      var total = Math.floor(width / padding);
+
+      for (var i = 1; i < total; i++) {
+        var wd = -(canvas.width / 2) + i * padding;
+        ctx.fillStyle = 'red';
+        ctx.moveTo(wd, 0);
+        ctx.lineTo(wd, padding);
+        ctx.font = '10px arial';
+        ctx.fillText('' + -(total - i), wd - 4, padding + 12);
+      }
+
+      for (var _i2 = 1; _i2 < total; _i2++) {
+        var _wd = _i2 * padding;
+        ctx.fillStyle = 'white';
+        ctx.moveTo(_wd, 0);
+        ctx.lineTo(_wd, -padding);
+        ctx.font = '10px arial';
+        ctx.fillText('' + _i2, _wd + 5, -padding);
+      }
+    }
+  }, {
+    key: 'drawCroos',
+    value: function drawCroos() {
+      ctx.strokeStyle = 'white';
+      ctx.moveTo(0, -(canvas.height / 2));
+      ctx.lineTo(0, canvas.height / 2);
+      //this.drawVerticalSpot();
+      ctx.moveTo(-(canvas.width / 2), 0);
+      ctx.lineTo(canvas.width / 2, 0);
+      //this.drawHorizontalSpot();
+      ctx.stroke();
     }
   }, {
     key: 'update',
@@ -1231,11 +1295,9 @@ var Universe = function () {
       var height = canvas.height * 0.9;
       canvas.x = 0;
       canvas.y = 0;
-
-      var _calcCenter = (0, _index.calcCenter)(canvas, { height: height, width: width }),
-          x = _calcCenter.x,
-          y = _calcCenter.y;
-
+      var center = (0, _index.calcCenter)(canvas, { height: height, width: width });
+      var x = -(canvas.width / 2) + center.x;
+      var y = -canvas.height / 2 + center.y;
       clock.futureTime = 1000;
       (0, _index.everyFrame)(clock, function () {
         //console.log("Done")
@@ -1250,7 +1312,7 @@ var Universe = function () {
       this.stage.render();
       ctx.closePath();
       ctx.restore();
-      this.controls.render();
+      //this.controls.render();
     }
   }, {
     key: 'moveEvent',
@@ -1271,10 +1333,10 @@ var Universe = function () {
           y = _calcCartesiano.y;
 
       var nav = this.stage.find('nav');
-      var info = this.stage.find('info');
+      //let info = this.stage.find('info');     
       var deg = this.coordidatesToDeg(x, y);
-      var message = 'deg: ' + Math.floor(deg) + ', x: ' + x + ', y: ' + y;
-      info.data = message;
+      //let message = `deg: ${ Math.floor(deg) }, x: ${ x }, y: ${ y }`;
+      //info.data = message;
       nav.angle = deg;
     }
   }, {
@@ -1297,7 +1359,8 @@ var Universe = function () {
   }, {
     key: 'calcCartesiano',
     value: function calcCartesiano(candidateX, candidateY) {
-      var x = -candidateX + canvas.width / 2;
+      var x = candidateX - canvas.width / 2;
+      //console.log(x)
       var y = canvas.height / 2 - candidateY;
       return { x: x, y: y };
     }
@@ -1306,7 +1369,7 @@ var Universe = function () {
     value: function coordidatesToDeg(x, y) {
       var rad = Math.atan2(x, y);
       var deg = rad * (180 / Math.PI);
-      return -deg;
+      return deg;
     }
   }, {
     key: 'markSpot',
@@ -1333,29 +1396,42 @@ var Universe = function () {
       var _this2 = this;
 
       this.stage = new _Stage2.default(canvas, true);
-
-      var _calcCartesiano2 = this.calcCartesiano(50, 0),
-          x = _calcCartesiano2.x,
-          y = _calcCartesiano2.y;
-
-      var nav = new _SpaceShip2.default({ width: 25, height: 25, x: x, y: y, ctx: ctx, color: 'white', id: 'nav' });
+      var nav = new _SpaceShip2.default({
+        width: 25,
+        height: 25,
+        x: 0,
+        y: 0,
+        ctx: ctx,
+        color: 'white',
+        id: 'nav'
+      });
       this.stage.push(nav);
+
       var onMove = this.moveEvent.bind(this);
       canvas.addEventListener('mousemove', function (e) {
         var mousePos = _this2.getMousePos(canvas, e);
-        var calc = _this2.calcCartesiano(mousePos.x, mousePos.y);
+
+        var _calcCartesiano2 = _this2.calcCartesiano(mousePos.x, mousePos.y),
+            x = _calcCartesiano2.x,
+            y = _calcCartesiano2.y;
+        //console.log(-x, ' ', y);
+        //let info = this.stage.find('info');
+        //info.data = `deg: 0, x: ${Math.floor(-x/15)}, y: ${Math.floor(y/15)}`;  
         //console.log(calc) 
-        var deg = _this2.coordidatesToDeg(calc.x, calc.y);
+
+
+        var deg = _this2.coordidatesToDeg(x, y);
         //console.log(deg)
 
         var magnitude = _this2.stage.find('nav').vector.magnitude;
 
         _this2.moveVectorNav(deg / -magnitude);
       });
-
-      this.controls = new _Controls2.default({ stage: this.stage, canvas: canvas, onMove: onMove }, true);
+      /*    
+      this.controls = new Controls({stage: this.stage, canvas, onMove}, true);
       canvas.addEventListener("touchstart", this.markSpot.bind(this));
       //canvas.addEventListener("mouseup", this.markSpot.bind(this));
+      */
     }
   }, {
     key: 'addSpot',
@@ -2436,7 +2512,10 @@ var Stage = function () {
     var calc = (0, _index.calcCenter)({ width: width, height: height, x: x, y: y }, { width: this.width, height: this.height });
     this.x = calc.x;
     this.y = 0;
-    this.layers = [new _TextBox2.default(ctx, 10, 20, 'deg: 0, x: 0, y: 0', '12px arial', true, 'info')];
+    this.layers = [
+      //new TextBox(ctx, 10, 20, 'deg: 0, x: 0, y: 0', '12px arial', true, 'info'),
+      //new Mask({ctx, canvas})
+    ];
   }
 
   (0, _createClass3.default)(Stage, [{
@@ -2472,11 +2551,13 @@ var Stage = function () {
         layer.render();
       });
       if (debug) {
+        /*
         ctx.beginPath();
         ctx.strokeStyle = 'white';
         ctx.rect(x, y, width, height);
         ctx.stroke();
         ctx.closePath();
+        */
       }
     }
   }]);

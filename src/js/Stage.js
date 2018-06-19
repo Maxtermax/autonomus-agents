@@ -15,7 +15,7 @@ export default class Stage {
     this.x = calc.x;
     this.y = 0;
     this.layers = [
-      new TextBox(ctx, 10, 20, 'deg: 0, x: 0, y: 0', '12px arial', true, 'info'),
+      //new TextBox(ctx, 10, 20, 'deg: 0, x: 0, y: 0', '12px arial', true, 'info'),
       //new Mask({ctx, canvas})
     ]
   }
@@ -35,11 +35,13 @@ export default class Stage {
       layer.render();
     })
     if (debug) {
+      /*
       ctx.beginPath();
       ctx.strokeStyle = 'white';
       ctx.rect(x, y, width, height);
       ctx.stroke();
       ctx.closePath();
+      */
     }
   }
 }
