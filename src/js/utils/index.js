@@ -5,20 +5,20 @@ export const calcCenter = (container, item) => {
 }
 
 export const isCollide = (type = 'square', a, b) => {
-  if(type === 'square') {
-    let x = (a.x >= b.x) && (a.x <= b.x+(b.width || b.bulletWidth));
+  if (type === 'square') {
+    let x = (a.x >= b.x) && (a.x <= b.x + (b.width || b.bulletWidth));
     let y = (a.y >= b.y) && (a.y <= b.y + (b.height || b.bulletHeight));
-    return x && y;    
+    return x && y;
   }
-  if(type === 'circle') {
-    let overLapX = a.x+a.r >= b.x - b.r && a.x - a.r <= b.x+b.r;
-    let overLapY = a.y+a.r >= b.y - b.r && a.y - a.r <= b.y + b.r; 
+  if (type === 'circle') {
+    let overLapX = a.x + a.r >= b.x - b.r && a.x - a.r <= b.x + b.r;
+    let overLapY = a.y + a.r >= b.y - b.r && a.y - a.r <= b.y + b.r;
     return overLapX && overLapY;
-  } 
+  }
 }
 
 export const touchEvents = (DOMelement, type = 'drag', cb) => {
-  if(type === 'drag') {
+  if (type === 'drag') {
     let hold = false;
     DOMelement.addEventListener("touchstart", (e) => hold = true, false);
     DOMelement.addEventListener("touchend", (e) => {
@@ -26,7 +26,7 @@ export const touchEvents = (DOMelement, type = 'drag', cb) => {
       e.dragStop = true;
       cb(e);
     }, false);
-    DOMelement.addEventListener("touchleave",(e) => {
+    DOMelement.addEventListener("touchleave", (e) => {
       hold = false;
       e.dragStop = true;
       cb(e);
@@ -39,7 +39,16 @@ export const touchEvents = (DOMelement, type = 'drag', cb) => {
       hold = false;
       e.dragStop = true;
       cb(e);
-    });    
+    });
+  }
+}
+
+export const everyFrame = (data, cb) => {
+  let delta = Date.now() - data.initialTime;
+  //console.log('delta  ', delta)
+  if (delta >= data.futureTime) {
+    cb(data);
+    data.initialTime = Date.now();  
   }
 }
 
