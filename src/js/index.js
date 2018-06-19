@@ -15,6 +15,8 @@ let clock = { initialTime: Date.now(), x: 0, y: 0 }
 class Universe {
   constructor() {
     this.FPS = 1000 / 60;
+    this.pointerX = 0;
+    this.pointerY = 0;
   }
 
   render() {
@@ -22,9 +24,9 @@ class Universe {
       clear(canvas);
       ctx.save();
       ctx.beginPath();
-      let x = canvas.width/2;
-      let y = canvas.height/2;
-      ctx.translate(x, y);
+      //let x = canvas.width/2;
+      //let y = canvas.height/2;
+      //ctx.translate(x, y);
       //ctx.rotate(180 * Math.PI / 180);
       //ctx.scale(-1, 1);
       this.drawCroos();
@@ -36,61 +38,32 @@ class Universe {
 
   drawVerticalSpot() {
     let height = canvas.height/2;
-    let padding = 15;
-    let total = Math.floor(height/padding);
-    
-    for(let i = 0; i < total;i++) {
-      let width = (-(canvas.height/2))+(i*padding)
-      ctx.fillStyle = 'white';
-      ctx.moveTo(0, width);
-      ctx.lineTo(padding, width);
-      ctx.font = '10px arial';
-      ctx.fillText(`${total - i}`,padding+5, width+5);      
-    }    
-    
-    for(let i = 1; i < total; i++) {
-      let width = (i*padding);
-      ctx.fillStyle = 'red';
-      ctx.moveTo(0, width);
-      ctx.lineTo(padding, width);
-      ctx.font = '10px arial';
-      ctx.fillText(`${-i}`,padding+5, width+5);      
-    }    
+    let { pointerY } = this;
+    ctx.strokeStyle = 'white';
+    ctx.moveTo((canvas.width/2)+pointerY, 0);
+    ctx.lineTo((canvas.width/2)+pointerY, canvas.height);
+    ctx.stroke();
   }
 
   drawHorizontalSpot() {
-    let width = canvas.width/2;
-    let padding = 15;
-    let total = Math.floor(width/padding);
-    
-    for(let i = 1; i < total ;i++) {
-      let wd = (-(canvas.width/2))+(i*padding)
-      ctx.fillStyle = 'red';
-      ctx.moveTo(wd, 0);
-      ctx.lineTo(wd, padding);
-      ctx.font = '10px arial';
-      ctx.fillText(`${-(total - i)}`,wd-4, padding+12);      
-    }    
-
-    for(let i = 1; i < total ;i++) {
-      let wd = (i*padding);
-      ctx.fillStyle = 'white';
-      ctx.moveTo(wd, 0);
-      ctx.lineTo(wd, -padding);
-      ctx.font = '10px arial';
-      ctx.fillText(`${i}`,wd+5, -padding);      
-    }    
-
+    let height = canvas.height/2;
+    let { pointerX } = this;
+    ctx.fillStyle = 'white';
+    ctx.strokeStyle = 'white';
+    ctx.moveTo(0, height+pointerX);
+    ctx.lineTo(canvas.width, height+pointerX);
+    ctx.stroke();
   }
 
   drawCroos() { 
     ctx.strokeStyle = 'white';
-    ctx.moveTo(0, -(canvas.height/2));
-    ctx.lineTo(0, (canvas.height/2));
-    //this.drawVerticalSpot();
-    ctx.moveTo(-(canvas.width/2), 0);
-    ctx.lineTo(canvas.width/2, 0);
-    //this.drawHorizontalSpot();
+    ctx.moveTo(canvas.width/2, 0);
+    ctx.lineTo(canvas.width/2, canvas.height);
+    this.drawVerticalSpot();
+
+    ctx.moveTo(0, canvas.height/2);
+    ctx.lineTo(canvas.width, canvas.height/2);
+    this.drawHorizontalSpot();
     ctx.stroke();    
   }
 
@@ -99,9 +72,7 @@ class Universe {
     let height = canvas.height * 0.9;
     canvas.x = 0;
     canvas.y = 0;
-    let center  = calcCenter(canvas, { height, width });
-    let x = -(canvas.width/2)+center.x;
-    let y = -(canvas.height)/2+center.y;
+    let {x,y} = calcCenter(canvas, { height, width });
     clock.futureTime = 1000;
     everyFrame(clock, () => {
       //console.log("Done")
@@ -153,7 +124,7 @@ class Universe {
   }
 
   calcCartesiano(candidateX, candidateY) {
-    let x = candidateX-(canvas.width/2);
+    let x = (canvas.width/2) - candidateX;
     //console.log(x)
     let y = (canvas.height/2) - candidateY;    
     return { x, y };
@@ -179,12 +150,17 @@ class Universe {
 
 
   preload() {
-    this.stage = new Stage(canvas, true);    
+    this.stage = new Stage(canvas, true);  
+    let desireX = 0;  
+    let { x, y } = this.calcCartesiano(-desireX, 0);
+    let info = this.stage.find('info');
+    info.x = 50;
+    info.y = 80;
     let nav = new SpaceShip({
       width: 25, 
       height: 25, 
-      x: 0, 
-      y: 0, 
+      x, 
+      y, 
       ctx, 
       color: 'white', 
       id: 'nav' 
@@ -195,20 +171,18 @@ class Universe {
     canvas.addEventListener('mousemove', e => {
       let mousePos = this.getMousePos(canvas, e);
       let {x, y} = this.calcCartesiano(mousePos.x, mousePos.y);     
-      //console.log(-x, ' ', y);
-      //let info = this.stage.find('info');
-      //info.data = `deg: 0, x: ${Math.floor(-x/15)}, y: ${Math.floor(y/15)}`;  
-      //console.log(calc) 
+      this.pointerX = -y;
+      this.pointerY = -x;
+      info.data = `deg: 0, x: ${Math.floor(-x)}, y: ${Math.floor(y)}`;  
       let deg = this.coordidatesToDeg(x, y);
       //console.log(deg)
-      let {magnitude} = this.stage.find('nav').vector;
-      this.moveVectorNav(deg/(-magnitude));
+      //let {magnitude} = this.stage.find('nav').vector;
+      //this.moveVectorNav(deg/(-magnitude));
     })
-    /*    
+
     this.controls = new Controls({stage: this.stage, canvas, onMove}, true);
     canvas.addEventListener("touchstart", this.markSpot.bind(this));
-    //canvas.addEventListener("mouseup", this.markSpot.bind(this));
-    */
+    canvas.addEventListener("mouseup", this.markSpot.bind(this));
   }
 
   addSpot(x, y) {
