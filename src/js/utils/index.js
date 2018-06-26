@@ -17,6 +17,39 @@ export const isCollide = (type = 'square', a, b) => {
   }
 }
 
+
+export const guid = () => {
+  function s4() {
+    return Math.floor((1 + Math.random()) * 0x10000)
+      .toString(16)
+      .substring(1);
+  }
+  return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+}
+
+export const calcCartesiano = (candidateX, candidateY, canvas) => {
+    let x = candidateX-(canvas.width/2);
+    //console.log(x)
+    let y = (canvas.height/2) - candidateY;    
+    return { x, y };
+}
+
+export const coordidatesToDeg = (x, y) => {
+  let rad = Math.atan2(x, y);
+  let deg = rad * 360 / (2* Math.PI);
+  return deg;
+}
+
+export const getMousePos = (canvas, evt) => {
+  var rect = canvas.getBoundingClientRect();
+  return {
+    x: evt.clientX - rect.left,
+    y: evt.clientY - rect.top
+  }
+}
+
+
+
 export const touchEvents = (DOMelement, type = 'drag', cb) => {
   if (type === 'drag') {
     let hold = false;

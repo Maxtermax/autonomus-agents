@@ -1,12 +1,12 @@
 import TextBox from './components/TextBox.js';
 import Explotion from './Explotion.js';
 import Vector from './components/Vector.js';
-import { isOverLapping } from './utils/index.js';
+import { isOverLapping, guid } from './utils/index.js';
 const Shoot = document.getElementById('shoot');
 let now = Date.now();
 
 export default class SpaceShip {
-  constructor({ ctx, width, height, x, y, color = 'white', id }) {
+  constructor({ ctx, width, height, x, y, color = 'white', id = guid(), display = true }) {
     this.width = width;
     this.height = height;
     this.prevX = x;
@@ -21,8 +21,9 @@ export default class SpaceShip {
     this.angle = 0;
     this.dtAngle = 0;
     this.translateOnce = false;
+    this.display = display;
     //this.info = new TextBox(ctx, x, y, 'deg: 0, x:0, y:0', '12px arial', true, id = 'info');
-    this.vector = new Vector({ctx, x: 0, y:0, magnitude: -45, direction: 0});
+    this.vector = new Vector({ctx, x: 0, y:0, magnitude: -30, direction: 0});
   }
 
   drawShip() {
@@ -31,9 +32,9 @@ export default class SpaceShip {
     ctx.save();//save angle
     ctx.translate(x + (width / 2), y + (height / 2));
     if (this.angle) {
-      if (this.dtAngle <= this.angle) this.dtAngle += 4;
-      if (this.dtAngle >= this.angle) this.dtAngle -= 4;
-      ctx.rotate(this.dtAngle * Math.PI / 180);
+      //if (this.dtAngle <= this.angle) this.dtAngle += 1;
+      //if (this.dtAngle >= this.angle) this.dtAngle -= 1;
+      ctx.rotate(this.angle * Math.PI / 180);
     }
     /*
     let dt = Date.now() - now;

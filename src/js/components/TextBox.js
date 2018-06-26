@@ -1,5 +1,5 @@
 export default class TextBox {
-  constructor(ctx, x, y, data = '', font = '12px arial', display = false, id = '') {
+  constructor({ctx, x, y,  id = guid(), data = '', font = '12px arial', display = true}) {
     this.ctx = ctx;
     this.font = font;
     this.x = x;
@@ -10,7 +10,6 @@ export default class TextBox {
   }
 
   render() {
-    this.rendered = false;
     let { ctx, font, x, y, data, display } = this;
     if (display) {
       ctx.beginPath();
@@ -26,6 +25,5 @@ export default class TextBox {
       ctx.restore();
       ctx.closePath();
     }
-    this.rendered = true;
   }
 }

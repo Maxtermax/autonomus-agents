@@ -77,6 +77,24 @@ amdefine@>=0.0.4:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/amdefine/-/amdefine-1.0.1.tgz#4a5282ac164729e93619bcfd3ad151f817ce91f5"
 
+amp-extend@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/amp-extend/-/amp-extend-1.0.1.tgz#6c543bee629c116b831857642f0ff940a15ae1ff"
+  dependencies:
+    amp-is-object "^1.0.0"
+
+amp-is-array@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/amp-is-array/-/amp-is-array-1.0.1.tgz#e7c42e450191b5e8a48ab02da69ce9e1f9a5058c"
+
+amp-is-number@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/amp-is-number/-/amp-is-number-1.0.1.tgz#f430d2e65d1bbd2cc41dbd9afb7f03d3e328a314"
+
+amp-is-object@^1.0.0, amp-is-object@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/amp-is-object/-/amp-is-object-1.0.1.tgz#0a8cb5956b9112a16a73677e8cbad37bba247702"
+
 ansi-regex@^2.0.0:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/ansi-regex/-/ansi-regex-2.1.1.tgz#c3b33ab5ee360d86e0e628f0468ae7ef27d654df"
@@ -1665,6 +1683,15 @@ cookie-signature@1.0.6:
 cookie@0.3.1:
   version "0.3.1"
   resolved "https://registry.yarnpkg.com/cookie/-/cookie-0.3.1.tgz#e7e0a1f9ef43b4c8ba925c5c5a96e806d16873bb"
+
+coordinate-systems@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/coordinate-systems/-/coordinate-systems-1.1.0.tgz#aef2a12c48e114bdc205f6229d840fe7c354cb85"
+  dependencies:
+    amp-extend "^1.0.1"
+    amp-is-array "^1.0.1"
+    amp-is-number "^1.0.1"
+    amp-is-object "^1.0.1"
 
 copy-concurrently@^1.0.0:
   version "1.0.5"
