@@ -1030,9 +1030,9 @@ var _Explotion = __webpack_require__(92);
 
 var _Explotion2 = _interopRequireDefault(_Explotion);
 
-var _Vector = __webpack_require__(93);
+var _Grid = __webpack_require__(109);
 
-var _Vector2 = _interopRequireDefault(_Vector);
+var _Grid2 = _interopRequireDefault(_Grid);
 
 var _index = __webpack_require__(14);
 
@@ -1048,6 +1048,14 @@ var SpaceShip = function () {
         height = _ref.height,
         x = _ref.x,
         y = _ref.y,
+        _ref$angle = _ref.angle,
+        angle = _ref$angle === undefined ? 0 : _ref$angle,
+        _ref$moveX = _ref.moveX,
+        moveX = _ref$moveX === undefined ? 0 : _ref$moveX,
+        _ref$moveY = _ref.moveY,
+        moveY = _ref$moveY === undefined ? 0 : _ref$moveY,
+        _ref$acceleration = _ref.acceleration,
+        acceleration = _ref$acceleration === undefined ? 0 : _ref$acceleration,
         _ref$color = _ref.color,
         color = _ref$color === undefined ? 'white' : _ref$color,
         _ref$id = _ref.id,
@@ -1067,12 +1075,13 @@ var SpaceShip = function () {
     this.id = id;
     this.bound = false;
     this.momentum = 100;
-    this.angle = 0;
-    this.dtAngle = 0;
-    this.translateOnce = false;
+    this.angle = angle;
     this.display = display;
+    this.acceleration = acceleration;
+    this.moveX = moveX;
+    this.moveY = moveY;
+    this.grid = new _Grid2.default({ ctx: ctx, x: 0, y: 0, width: 100, height: 100, padding: 10, color: 'red' });
     //this.info = new TextBox(ctx, x, y, 'deg: 0, x:0, y:0', '12px arial', true, id = 'info');
-    this.vector = new _Vector2.default({ ctx: ctx, x: 0, y: 0, magnitude: -30, direction: 0 });
   }
 
   (0, _createClass3.default)(SpaceShip, [{
@@ -1090,30 +1099,13 @@ var SpaceShip = function () {
           _viewAmplitude = this.viewAmplitude,
           viewAmplitude = _viewAmplitude === undefined ? 50 : _viewAmplitude;
 
-
       ctx.save(); //save angle
-      ctx.translate(x + width / 2, y + height / 2);
-      if (this.angle) {
-        //if (this.dtAngle <= this.angle) this.dtAngle += 1;
-        //if (this.dtAngle >= this.angle) this.dtAngle -= 1;
-        ctx.rotate(this.angle * Math.PI / 180);
-      }
-      /*
-      let dt = Date.now() - now;
-      if(dt >= 1000) {
-        //console.log("segundo")
-        now = Date.now();
-      }
-      */
-
-      //ctx.beginPath();
-      //ctx.fillStyle = 'blue';
-      //ctx.fillRect(0, 0, 100, 100);
-      //ctx.closePath();
 
       ctx.beginPath();
+      ctx.translate(x, y);
+      ctx.rotate(this.angle * Math.PI / 180);
       ctx.fillStyle = color;
-      ctx.fillRect(-(width / 2), -(height / 2), width, height);
+      ctx.fillRect(x, y, width, height);
       ctx.closePath(); //ship    
 
       ctx.beginPath();
@@ -1122,22 +1114,22 @@ var SpaceShip = function () {
       ctx.arc(0, 0, width * 1.5, 0, 2 * Math.PI);
       ctx.stroke();
       ctx.closePath(); //arc bound 
+      //this.grid.render();
 
-      /* 
-      ctx.beginPath();    
-      ctx.moveTo(0, 0);
-      ctx.lineTo(viewAmplitude, -viewRange);
-      ctx.moveTo(0, 0);
-      ctx.lineTo(-viewAmplitude, -viewRange);
-      ctx.strokeStyle = 'white';
-      ctx.stroke();
-      ctx.closePath();
+      ctx.restore(); //restore angle
+
+      /*
+      this.info.x = this.x+(this.width/2);
+      this.info.y = this.y+(this.height);  
+      this.info.data = `deg: ${ Math.floor(this.dtAngle) }, x: ${ Math.floor(this.x) }, y: ${ Math.floor(this.y) }`;           
+      this.info.render(); 
       */
-      if (this.bound) {
-        //this.angle++
-        //ctx.translate(x+(width/2), y+(height/2));
-        //ctx.rotate(this.angle * Math.PI / 180);
-      }
+    }
+  }, {
+    key: 'update',
+    value: function update() {
+
+      this.x += this.acceleration;
 
       if (this.bound) {
         if (this.prevX < this.x) this.x += this.momentum / 100;
@@ -1146,6 +1138,7 @@ var SpaceShip = function () {
         if (this.prevY > this.y) this.y -= this.momentum / 100;
         this.momentum -= 1;
       }
+
       if (this.momentum <= 0) {
         this.bound = false;
         this.momentum = 100;
@@ -1153,15 +1146,6 @@ var SpaceShip = function () {
         this.prevX = this.x;
         this.prevY = this.y;
       }
-      this.translateOnce = true;
-      this.vector.render();
-      ctx.restore(); //restore angle
-      /*
-      this.info.x = this.x+(this.width/2);
-      this.info.y = this.y+(this.height);  
-      this.info.data = `deg: ${ Math.floor(this.dtAngle) }, x: ${ Math.floor(this.x) }, y: ${ Math.floor(this.y) }`;           
-      this.info.render(); 
-      */
     }
   }, {
     key: 'render',
@@ -1173,6 +1157,7 @@ var SpaceShip = function () {
           ctx = this.ctx,
           color = this.color;
 
+      this.update();
       this.drawShip();
     }
   }]);
@@ -1196,6 +1181,10 @@ module.exports = __webpack_require__(102);
 
 "use strict";
 
+
+var _getIterator2 = __webpack_require__(103);
+
+var _getIterator3 = _interopRequireDefault(_getIterator2);
 
 var _classCallCheck2 = __webpack_require__(0);
 
@@ -1228,6 +1217,10 @@ var _Spot2 = _interopRequireDefault(_Spot);
 var _Grid = __webpack_require__(109);
 
 var _Grid2 = _interopRequireDefault(_Grid);
+
+var _Vector = __webpack_require__(93);
+
+var _Vector2 = _interopRequireDefault(_Vector);
 
 var _index = __webpack_require__(14);
 
@@ -1281,6 +1274,15 @@ var Universe = function () {
     key: 'update',
     value: function update() {
       this.stage.render();
+      //let nav = this.stage.find('mainMask').find('nav');
+      //let vectorX = this.stage.find('mainMask').find('vectorX'); 
+      //nav.angle = 45;
+      /*
+      vectorX.refs.forEach(ref => {
+        ref.angle = vectorX.direction;
+        ref.acceleration = vectorX.magnitude*0.005;
+      })
+      */
     }
   }, {
     key: 'moveEvent',
@@ -1312,9 +1314,9 @@ var Universe = function () {
     value: function moveVectorNav() {
       var deg = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 
-      var nav = this.stage.find('mainMask').find('nav');
-      nav.angle = deg;
-      //nav.vector.direction = deg;
+      //let nav = this.stage.find('mainMask').find('nav');
+      var vectorX = this.stage.find('mainMask').find('vectorX');
+      vectorX.direction = deg;
     }
   }, {
     key: 'markSpot',
@@ -1324,15 +1326,23 @@ var Universe = function () {
             clientX = _e$targetTouches$.clientX,
             clientY = _e$targetTouches$.clientY;
 
-        this.addSpot(clientX, clientY);
-        this.updateAngle(clientX, clientY);
-      } else {
         var _getMousePos = (0, _index.getMousePos)(canvas, e),
             x = _getMousePos.x,
             y = _getMousePos.y;
 
         this.addSpot(x, y);
-        this.updateAngle(x, y);
+      } else {
+        var _getMousePos2 = (0, _index.getMousePos)(canvas, e),
+            _x2 = _getMousePos2.x,
+            _y = _getMousePos2.y;
+
+        var id = (0, _index.guid)();
+        this.addSpot(_x2 - canvas.width / 2, _y - canvas.height / 2, id);
+        var nav = this.stage.find('mainMask').find('nav');
+        var spot = this.stage.find(id);
+        var deg = (0, _index.coordidatesToDeg)(spot.x + canvas.width / 2, spot.y + canvas.width / 2);
+        nav.vectors[0].direction = deg;
+        console.log(deg);
       }
     }
   }, {
@@ -1341,55 +1351,90 @@ var Universe = function () {
       var _this2 = this;
 
       this.stage = new _Stage2.default(canvas, true);
-      var calc = (canvas.height + canvas.width) / 2;
-      /*
-      this.sectors.push(
-        new Grid({
-          ctx,
-          x: 0,
-          y: 0,
-          width: calc,
-          height: calc,
-          padding: calc/50,
-          color: 'rgba(255, 220, 0, 0.5)',
-          id: 'SECTOR1'
-        }),
-        new Grid({
-          ctx,
-          x: -calc,
-          y: 0,
-          width: calc,
-          height: calc,
-          padding: calc/50,
-          color: 'rgba(65, 220, 150, 0.5)',
-          id: 'SECTOR2'
-        }),
-        new Grid({
-          ctx,
-          x: -calc,
-          y: -calc,
-          width: calc,
-          height: calc,
-          padding: calc/50,
-          color: 'rgba(100, 220, 0, 0.5)',
-          id: 'SECTOR3'
-        }),            
-        new Grid({
-          ctx,
-          x: 0,
-          y: -calc,
-          width: calc,
-          height: calc,
-          padding: calc/50,
-          color: 'rgba(100, 220, 0, 0.5)',
-          id: 'SECTOR3'
-        }),            
-      )  
-        for (let sector of this.sectors) this.stage.push(sector);         
-      */
 
-      var nav = new _SpaceShip2.default({ width: 15, height: 15, x: 0, y: 0, ctx: ctx, color: 'white', id: 'nav' });
-      this.stage.find('mainMask').push(nav);
+      var calc = (canvas.height + canvas.width) / 2;
+      this.sectors.push(new _Grid2.default({
+        ctx: ctx,
+        x: 0,
+        y: 0,
+        width: calc,
+        height: calc,
+        padding: calc / 50,
+        color: 'rgba(255, 220, 0, 0.5)',
+        id: 'SECTOR1'
+      }), new _Grid2.default({
+        ctx: ctx,
+        x: -calc,
+        y: 0,
+        width: calc,
+        height: calc,
+        padding: calc / 50,
+        color: 'rgba(65, 220, 150, 0.5)',
+        id: 'SECTOR2'
+      }), new _Grid2.default({
+        ctx: ctx,
+        x: -calc,
+        y: -calc,
+        width: calc,
+        height: calc,
+        padding: calc / 50,
+        color: 'rgba(100, 220, 0, 0.5)',
+        id: 'SECTOR3'
+      }), new _Grid2.default({
+        ctx: ctx,
+        x: 0,
+        y: -calc,
+        width: calc,
+        height: calc,
+        padding: calc / 50,
+        color: 'rgba(100, 220, 0, 0.5)',
+        id: 'SECTOR3'
+      }));
+      var _iteratorNormalCompletion = true;
+      var _didIteratorError = false;
+      var _iteratorError = undefined;
+
+      try {
+        for (var _iterator = (0, _getIterator3.default)(this.sectors), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+          var sector = _step.value;
+          this.stage.push(sector);
+        }
+      } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion && _iterator.return) {
+            _iterator.return();
+          }
+        } finally {
+          if (_didIteratorError) {
+            throw _iteratorError;
+          }
+        }
+      }
+
+      var vectorX = new _Vector2.default({
+        ctx: ctx,
+        magnitude: 25,
+        direction: 180,
+        id: 'vectorX'
+      });
+
+      this.stage.find('mainMask').push(vectorX);
+      /*
+      let nav = new SpaceShip({
+        width: 15, 
+        height: 15, 
+        x: 0, 
+        y: 0,  
+        ctx, 
+        color: 'white', 
+        id: 'nav',
+        angle: 45
+      })    
+      this.stage.find('mainMask').push(nav);    
+      */
 
       var onMove = this.moveEvent.bind(this);
       canvas.addEventListener('mousemove', function (e) {
@@ -1406,13 +1451,15 @@ var Universe = function () {
       });
 
       this.controls = new _Controls2.default({ stage: this.stage, canvas: canvas, onMove: onMove }, true);
-      //canvas.addEventListener("touchstart", this.markSpot.bind(this));
-      //canvas.addEventListener("mouseup", this.markSpot.bind(this));
+      canvas.addEventListener("touchstart", this.markSpot.bind(this));
+      canvas.addEventListener("mouseup", this.markSpot.bind(this));
     }
   }, {
     key: 'addSpot',
     value: function addSpot(x, y) {
-      var spot = new _Spot2.default({ x: x, y: y, ctx: ctx, display: true, size: 10 });
+      var id = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : (0, _index.guid)();
+
+      var spot = new _Spot2.default({ x: x, y: y, ctx: ctx, display: true, size: 10, id: id });
       this.stage.layers.push(spot);
     }
   }]);
@@ -2455,23 +2502,40 @@ var _createClass2 = __webpack_require__(1);
 
 var _createClass3 = _interopRequireDefault(_createClass2);
 
+var _Grid = __webpack_require__(109);
+
+var _Grid2 = _interopRequireDefault(_Grid);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var Vector = function () {
   function Vector(_ref) {
     var ctx = _ref.ctx,
-        x = _ref.x,
-        y = _ref.y,
         magnitude = _ref.magnitude,
         _ref$direction = _ref.direction,
-        direction = _ref$direction === undefined ? 0 : _ref$direction;
+        direction = _ref$direction === undefined ? 0 : _ref$direction,
+        id = _ref.id,
+        _ref$display = _ref.display,
+        display = _ref$display === undefined ? true : _ref$display,
+        _ref$refs = _ref.refs,
+        refs = _ref$refs === undefined ? [] : _ref$refs;
     (0, _classCallCheck3.default)(this, Vector);
 
     this.ctx = ctx;
-    this.x = x;
-    this.y = y;
+    this.x = magnitude * Math.cos(direction);
+    this.y = magnitude * Math.sin(direction);;
     this.magnitude = magnitude;
     this.direction = direction;
+    this.id = id;
+    this.display = display;
+    this.refs = refs;
+    this.grid = new _Grid2.default({
+      ctx: ctx,
+      width: 100,
+      height: 100,
+      padding: 10,
+      color: 'blue'
+    });
   }
 
   (0, _createClass3.default)(Vector, [{
@@ -2505,14 +2569,18 @@ var Vector = function () {
 
       ctx.save();
       ctx.beginPath();
-      ctx.rotate(direction);
-      ctx.lineTo(x, y);
-      ctx.lineTo(x, y + magnitude);
-      ctx.strokeStyle = 'red';
-      ctx.lineCap = "round";
-      ctx.lineWidth = 2;
-      ctx.stroke();
-      this.drawHead();
+      //ctx.rotate(direction * Math.PI / 180);
+      this.grid.render();
+      ctx.fillStyle = 'white';
+      ctx.fillRect(0, 0, 10, 10);
+      ctx.fillRect(x, y, 10, 10);
+      //ctx.lineTo(x, y);  
+      //ctx.lineTo(x, y+(magnitude));  
+      //ctx.strokeStyle = 'red';
+      //ctx.lineCap="round";
+      //ctx.lineWidth = 2;
+      //ctx.stroke();
+      //this.drawHead();
       ctx.closePath();
       ctx.restore();
     }

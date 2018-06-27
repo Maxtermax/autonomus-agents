@@ -4,6 +4,7 @@ import Controls from './Controls.js'
 import SpaceShip from './SpaceShip.js';
 import Spot from './components/Spot.js';
 import Grid from './components/Grid.js';
+import Vector from './components/Vector.js';
 import {  
   calcCenter, 
   calcCartesiano,
@@ -14,7 +15,8 @@ import {
   isOverLapping, 
   getRandomInt, 
   everyFrame, 
-  isCollide 
+  isCollide,
+  guid
 } from './utils/index.js';
 
 const intViewportWidth = window.innerWidth;
@@ -57,6 +59,15 @@ class Universe {
 
   update() {
     this.stage.render();
+    //let nav = this.stage.find('mainMask').find('nav');
+    //let vectorX = this.stage.find('mainMask').find('vectorX'); 
+    //nav.angle = 45;
+    /*
+    vectorX.refs.forEach(ref => {
+      ref.angle = vectorX.direction;
+      ref.acceleration = vectorX.magnitude*0.005;
+    })
+    */
   }
 
   moveEvent(handler) {
@@ -80,28 +91,33 @@ class Universe {
   }
 
   moveVectorNav(deg = 0) {
-    let nav = this.stage.find('mainMask').find('nav');
-    nav.angle = deg;
-    //nav.vector.direction = deg;
+    //let nav = this.stage.find('mainMask').find('nav');
+    let vectorX = this.stage.find('mainMask').find('vectorX');
+    vectorX.direction = deg;
   }
 
   markSpot(e) {
     if(e.targetTouches) {
       let { clientX, clientY } = e.targetTouches[0];      
-      this.addSpot(clientX, clientY);
-      this.updateAngle(clientX, clientY);        
-    } else {
       let { x, y } = getMousePos(canvas, e);
       this.addSpot(x, y);
-      this.updateAngle(x, y);              
+    } else {
+      let { x, y } = getMousePos(canvas, e);
+      let id = guid();
+      this.addSpot(x - canvas.width/2, y - canvas.height/2, id);
+      let nav = this.stage.find('mainMask').find('nav');
+      let spot = this.stage.find(id)      
+      let deg = coordidatesToDeg(spot.x + (canvas.width/2), spot.y + (canvas.width/2));
+      nav.vectors[0].direction = deg;
+      console.log(deg)
     }   
   }
   
 
   preload() {
     this.stage = new Stage(canvas, true);  
-    let calc = (canvas.height + canvas.width) / 2;
-    /*
+    
+    let calc = (canvas.height + canvas.width) / 2;    
     this.sectors.push(
       new Grid({
         ctx,
@@ -144,11 +160,28 @@ class Universe {
         id: 'SECTOR3'
       }),            
     )  
-      for (let sector of this.sectors) this.stage.push(sector);         
+    for (let sector of this.sectors) this.stage.push(sector);         
+    let vectorX = new Vector({
+      ctx, 
+      magnitude: 25, 
+      direction: 180,
+      id: 'vectorX'
+    })
+
+    this.stage.find('mainMask').push(vectorX);        
+    /*
+    let nav = new SpaceShip({
+      width: 15, 
+      height: 15, 
+      x: 0, 
+      y: 0,  
+      ctx, 
+      color: 'white', 
+      id: 'nav',
+      angle: 45
+    })    
+    this.stage.find('mainMask').push(nav);    
     */
-    
-    let nav = new SpaceShip({width: 15, height: 15, x: 0, y: 0,  ctx, color: 'white', id: 'nav'});
-    this.stage.find('mainMask').push(nav);        
 
     let onMove = this.moveEvent.bind(this);
     canvas.addEventListener('mousemove', e => {
@@ -161,13 +194,13 @@ class Universe {
     })
 
     this.controls = new Controls({stage: this.stage, canvas, onMove}, true);
-    //canvas.addEventListener("touchstart", this.markSpot.bind(this));
-    //canvas.addEventListener("mouseup", this.markSpot.bind(this));
+    canvas.addEventListener("touchstart", this.markSpot.bind(this));
+    canvas.addEventListener("mouseup", this.markSpot.bind(this));
   }
 
-  addSpot(x, y) {
-    let spot = new Spot({x, y, ctx, display: true, size: 10});
-    this.stage.layers.push(spot);
+  addSpot(x, y, id = guid()) {
+    let spot = new Spot({x, y, ctx, display: true, size: 10, id});
+    this.stage.layers.push(spot);    
   }
 }
 
