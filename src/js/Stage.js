@@ -18,17 +18,7 @@ export default class Stage {
       new Viewport({
         ctx, 
         canvas, 
-        id : 'mainMask',
-        layers: [
-          new TextBox({
-            ctx: this.ctx, 
-            x: -(width/2)+40, 
-            y: -(height/2)+60, 
-            data: 'deg: 0, x: 0, y: 0', 
-            font: '12px arial', 
-            id: 'info'
-          })
-        ]
+        id : 'mainMask'
       })
     ]
   }

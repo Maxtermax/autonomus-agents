@@ -1,12 +1,15 @@
 import Grid from './Grid.js'
 
 export default class Vector {
-  constructor({ctx, magnitude, direction = 0, id, display = true, refs = []}) {
+  constructor({ctx, x, y, canvas, magnitude, direction = 0, id, display = true, refs = []}) {
     this.ctx = ctx;
-    this.x = magnitude * Math.cos(direction);
-    this.y = magnitude * Math.sin(direction);;
+    //this.x = magnitude * Math.cos(direction);
+    //this.y = magnitude * Math.sin(direction);
+    this.canvas = canvas;
+    this.x = x;
+    this.y = y;
     this.magnitude = magnitude;
-    this.direction = direction;
+    this.direction = direction //* 180 / Math.PI;
     this.id = id;
     this.display = display;
     this.refs = refs;
@@ -34,14 +37,30 @@ export default class Vector {
   }
 
   render() {
-    let { ctx, magnitude, direction, x, y } = this;
+    let { ctx, magnitude, direction, x, y, canvas } = this;
+    //let calcCart = calcCartesiano(x, y, canvas);     
     ctx.save();
     ctx.beginPath();
+    ctx.translate(200, 200)
     //ctx.rotate(direction * Math.PI / 180);
-    this.grid.render();
+    //this.grid.render();
+
     ctx.fillStyle = 'white';
-    ctx.fillRect(0, 0, 10, 10);
-    ctx.fillRect(x, y, 10, 10);
+    ctx.fillRect(x, y, 10, 10);//ancla 
+    ctx.lineTo(x, y);
+
+    ctx.fillStyle = 'blue';
+    ctx.strokeStyle = 'red';
+    
+    //this.y = magnitude * Math.sin(direction);
+    let convertX = Math.round(magnitude * Math.cos(direction));
+    let convertY = Math.round(magnitude * Math.sin(direction));
+    this.convertX = convertX;
+    this.convertY = convertY;
+    ctx.fillRect(convertX, convertY, 10, 10);//head 
+    ctx.lineTo(convertX, convertY);//head 
+    ctx.stroke();
+    //ctx.fillRect(x, y, 10, 10);
     //ctx.lineTo(x, y);  
     //ctx.lineTo(x, y+(magnitude));  
     //ctx.strokeStyle = 'red';

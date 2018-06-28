@@ -1182,10 +1182,6 @@ module.exports = __webpack_require__(102);
 "use strict";
 
 
-var _getIterator2 = __webpack_require__(103);
-
-var _getIterator3 = _interopRequireDefault(_getIterator2);
-
 var _classCallCheck2 = __webpack_require__(0);
 
 var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
@@ -1253,7 +1249,7 @@ var Universe = function () {
         ctx.beginPath();
         var x = canvas.width / 2;
         var y = canvas.height / 2;
-        ctx.translate(x, y);
+        //ctx.translate(x, y);
         //this.drawCroos();
         _this.update();
         ctx.closePath();
@@ -1274,6 +1270,11 @@ var Universe = function () {
     key: 'update',
     value: function update() {
       this.stage.render();
+      var vectorX = this.stage.find('mainMask').find('vectorX');
+      var info = this.stage.find('mainMask').find('info');
+      //vectorX.direction+=0.5;
+      info.data = 'deg: ' + vectorX.direction + ', x: ' + vectorX.convertX + ', y: ' + vectorX.convertY;
+
       //let nav = this.stage.find('mainMask').find('nav');
       //let vectorX = this.stage.find('mainMask').find('vectorX'); 
       //nav.angle = 45;
@@ -1348,80 +1349,64 @@ var Universe = function () {
   }, {
     key: 'preload',
     value: function preload() {
-      var _this2 = this;
-
       this.stage = new _Stage2.default(canvas, true);
-
-      var calc = (canvas.height + canvas.width) / 2;
-      this.sectors.push(new _Grid2.default({
-        ctx: ctx,
-        x: 0,
-        y: 0,
-        width: calc,
-        height: calc,
-        padding: calc / 50,
-        color: 'rgba(255, 220, 0, 0.5)',
-        id: 'SECTOR1'
-      }), new _Grid2.default({
-        ctx: ctx,
-        x: -calc,
-        y: 0,
-        width: calc,
-        height: calc,
-        padding: calc / 50,
-        color: 'rgba(65, 220, 150, 0.5)',
-        id: 'SECTOR2'
-      }), new _Grid2.default({
-        ctx: ctx,
-        x: -calc,
-        y: -calc,
-        width: calc,
-        height: calc,
-        padding: calc / 50,
-        color: 'rgba(100, 220, 0, 0.5)',
-        id: 'SECTOR3'
-      }), new _Grid2.default({
-        ctx: ctx,
-        x: 0,
-        y: -calc,
-        width: calc,
-        height: calc,
-        padding: calc / 50,
-        color: 'rgba(100, 220, 0, 0.5)',
-        id: 'SECTOR3'
-      }));
-      var _iteratorNormalCompletion = true;
-      var _didIteratorError = false;
-      var _iteratorError = undefined;
-
-      try {
-        for (var _iterator = (0, _getIterator3.default)(this.sectors), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-          var sector = _step.value;
-          this.stage.push(sector);
-        }
-      } catch (err) {
-        _didIteratorError = true;
-        _iteratorError = err;
-      } finally {
-        try {
-          if (!_iteratorNormalCompletion && _iterator.return) {
-            _iterator.return();
-          }
-        } finally {
-          if (_didIteratorError) {
-            throw _iteratorError;
-          }
-        }
-      }
+      /*
+      let calc = (canvas.height + canvas.width) / 2;    
+      this.sectors.push(
+        new Grid({
+          ctx,
+          x: 0,
+          y: 0,
+          width: calc,
+          height: calc,
+          padding: calc/50,
+          color: 'rgba(255, 220, 0, 0.5)',
+          id: 'SECTOR1'
+        }),
+        new Grid({
+          ctx,
+          x: -calc,
+          y: 0,
+          width: calc,
+          height: calc,
+          padding: calc/50,
+          color: 'rgba(65, 220, 150, 0.5)',
+          id: 'SECTOR2'
+        }),
+        new Grid({
+          ctx,
+          x: -calc,
+          y: -calc,
+          width: calc,
+          height: calc,
+          padding: calc/50,
+          color: 'rgba(100, 220, 0, 0.5)',
+          id: 'SECTOR3'
+        }),            
+        new Grid({
+          ctx,
+          x: 0,
+          y: -calc,
+          width: calc,
+          height: calc,
+          padding: calc/50,
+          color: 'rgba(100, 220, 0, 0.5)',
+          id: 'SECTOR3'
+        }),            
+      )  
+      */
+      //for (let sector of this.sectors) this.stage.push(sector);         
 
       var vectorX = new _Vector2.default({
         ctx: ctx,
-        magnitude: 25,
-        direction: 180,
+        x: 0,
+        y: 0,
+        magnitude: 5.65, //gap 
+        direction: 0.1,
         id: 'vectorX'
       });
-
       this.stage.find('mainMask').push(vectorX);
+
       /*
       let nav = new SpaceShip({
         width: 15, 
@@ -1436,23 +1421,24 @@ var Universe = function () {
       this.stage.find('mainMask').push(nav);    
       */
 
-      var onMove = this.moveEvent.bind(this);
+      //let onMove = this.moveEvent.bind(this);
+      var viewport = this.stage.find('mainMask').find('info');
       canvas.addEventListener('mousemove', function (e) {
         var mousePos = (0, _index.getMousePos)(canvas, e);
-
-        var _calcCartesiano2 = (0, _index.calcCartesiano)(mousePos.x, mousePos.y, canvas),
-            x = _calcCartesiano2.x,
-            y = _calcCartesiano2.y;
-
-        var info = _this2.stage.find('mainMask').find('info');
-        var deg = (0, _index.coordidatesToDeg)(x, y);
-        info.data = 'deg: ' + Math.floor(deg) + ' x: ' + Math.floor(x) + ', y: ' + Math.floor(y);
-        _this2.moveVectorNav(deg);
+        var deg = (0, _index.coordidatesToDeg)(mousePos.x, mousePos.y);
+        viewport.data = 'deg: ' + Math.floor(deg) + ', x: ' + mousePos.x + ', y: ' + mousePos.y;
+        /*
+        let {x, y} = calcCartesiano(mousePos.x, mousePos.y, canvas);     
+        let info = this.stage.find('mainMask').find('info');
+        let deg = coordidatesToDeg(x, y);
+        info.data = `deg: ${Math.floor(deg)} x: ${Math.floor(x)}, y: ${Math.floor(y)}`;  
+        this.moveVectorNav(deg);
+        */
       });
 
-      this.controls = new _Controls2.default({ stage: this.stage, canvas: canvas, onMove: onMove }, true);
-      canvas.addEventListener("touchstart", this.markSpot.bind(this));
-      canvas.addEventListener("mouseup", this.markSpot.bind(this));
+      //this.controls = new Controls({stage: this.stage, canvas, onMove}, true);
+      //canvas.addEventListener("touchstart", this.markSpot.bind(this));
+      //canvas.addEventListener("mouseup", this.markSpot.bind(this));
     }
   }, {
     key: 'addSpot',
@@ -2511,6 +2497,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 var Vector = function () {
   function Vector(_ref) {
     var ctx = _ref.ctx,
+        x = _ref.x,
+        y = _ref.y,
+        canvas = _ref.canvas,
         magnitude = _ref.magnitude,
         _ref$direction = _ref.direction,
         direction = _ref$direction === undefined ? 0 : _ref$direction,
@@ -2522,10 +2511,13 @@ var Vector = function () {
     (0, _classCallCheck3.default)(this, Vector);
 
     this.ctx = ctx;
-    this.x = magnitude * Math.cos(direction);
-    this.y = magnitude * Math.sin(direction);;
+    //this.x = magnitude * Math.cos(direction);
+    //this.y = magnitude * Math.sin(direction);
+    this.canvas = canvas;
+    this.x = x;
+    this.y = y;
     this.magnitude = magnitude;
-    this.direction = direction;
+    this.direction = direction; //* 180 / Math.PI;
     this.id = id;
     this.display = display;
     this.refs = refs;
@@ -2565,15 +2557,32 @@ var Vector = function () {
           magnitude = this.magnitude,
           direction = this.direction,
           x = this.x,
-          y = this.y;
+          y = this.y,
+          canvas = this.canvas;
+      //let calcCart = calcCartesiano(x, y, canvas);     
 
       ctx.save();
       ctx.beginPath();
+      ctx.translate(200, 200);
       //ctx.rotate(direction * Math.PI / 180);
-      this.grid.render();
+      //this.grid.render();
+
       ctx.fillStyle = 'white';
-      ctx.fillRect(0, 0, 10, 10);
-      ctx.fillRect(x, y, 10, 10);
+      ctx.fillRect(x, y, 10, 10); //ancla 
+      ctx.lineTo(x, y);
+
+      ctx.fillStyle = 'blue';
+      ctx.strokeStyle = 'red';
+
+      //this.y = magnitude * Math.sin(direction);
+      var convertX = Math.round(magnitude * Math.cos(direction));
+      var convertY = Math.round(magnitude * Math.sin(direction));
+      this.convertX = convertX;
+      this.convertY = convertY;
+      ctx.fillRect(convertX, convertY, 10, 10); //head 
+      ctx.lineTo(convertX, convertY); //head 
+      ctx.stroke();
+      //ctx.fillRect(x, y, 10, 10);
       //ctx.lineTo(x, y);  
       //ctx.lineTo(x, y+(magnitude));  
       //ctx.strokeStyle = 'red';
@@ -2645,15 +2654,7 @@ var Stage = function () {
     this.layers = [new _Viewport2.default({
       ctx: ctx,
       canvas: canvas,
-      id: 'mainMask',
-      layers: [new _TextBox2.default({
-        ctx: this.ctx,
-        x: -(width / 2) + 40,
-        y: -(height / 2) + 60,
-        data: 'deg: 0, x: 0, y: 0',
-        font: '12px arial',
-        id: 'info'
-      })]
+      id: 'mainMask'
     })];
   }
 
@@ -3087,6 +3088,10 @@ var _createClass3 = _interopRequireDefault(_createClass2);
 
 var _index = __webpack_require__(14);
 
+var _TextBox = __webpack_require__(31);
+
+var _TextBox2 = _interopRequireDefault(_TextBox);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var Viewport = function () {
@@ -3108,11 +3113,19 @@ var Viewport = function () {
     var width = this.width = this.canvas.width * 0.9;
     var height = this.height = this.canvas.height * 0.9;
     var center = this.center = (0, _index.calcCenter)(canvas, { height: height, width: width });
-    this.x = -(canvas.width / 2) + center.x;
-    this.y = -canvas.height / 2 + center.y;
+    this.x = center.x;
+    this.y = center.y;
     this.id = id;
     this.display = display;
     this.layers = layers;
+    this.layers.push(new _TextBox2.default({
+      ctx: ctx,
+      x: this.x + 10,
+      y: this.y + 20,
+      data: 'deg: 0, x: 0, y: 0',
+      font: '12px arial',
+      id: 'info'
+    }));
   }
 
   (0, _createClass3.default)(Viewport, [{
@@ -3146,7 +3159,7 @@ var Viewport = function () {
       ctx.strokeStyle = 'red';
       ctx.strokeRect(x, y, width, height);
       ctx.rect(x, y, width, height);
-      ctx.clip();
+      //ctx.clip();
       var _iteratorNormalCompletion = true;
       var _didIteratorError = false;
       var _iteratorError = undefined;
