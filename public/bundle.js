@@ -364,7 +364,7 @@ var calcCartesiano = exports.calcCartesiano = function calcCartesiano(candidateX
 };
 
 var coordidatesToDeg = exports.coordidatesToDeg = function coordidatesToDeg(x, y) {
-  var rad = Math.atan2(x, y);
+  var rad = Math.atan2(y, x);
   var deg = rad * 360 / (2 * Math.PI);
   return deg;
 };
@@ -1014,6 +1014,10 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = undefined;
 
+var _getIterator2 = __webpack_require__(103);
+
+var _getIterator3 = _interopRequireDefault(_getIterator2);
+
 var _classCallCheck2 = __webpack_require__(0);
 
 var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
@@ -1046,6 +1050,8 @@ var SpaceShip = function () {
     var ctx = _ref.ctx,
         width = _ref.width,
         height = _ref.height,
+        _ref$vectors = _ref.vectors,
+        vectors = _ref$vectors === undefined ? [] : _ref$vectors,
         x = _ref.x,
         y = _ref.y,
         _ref$angle = _ref.angle,
@@ -1054,8 +1060,10 @@ var SpaceShip = function () {
         moveX = _ref$moveX === undefined ? 0 : _ref$moveX,
         _ref$moveY = _ref.moveY,
         moveY = _ref$moveY === undefined ? 0 : _ref$moveY,
-        _ref$acceleration = _ref.acceleration,
-        acceleration = _ref$acceleration === undefined ? 0 : _ref$acceleration,
+        _ref$accelerationX = _ref.accelerationX,
+        accelerationX = _ref$accelerationX === undefined ? 0 : _ref$accelerationX,
+        _ref$accelerationY = _ref.accelerationY,
+        accelerationY = _ref$accelerationY === undefined ? 0 : _ref$accelerationY,
         _ref$color = _ref.color,
         color = _ref$color === undefined ? 'white' : _ref$color,
         _ref$id = _ref.id,
@@ -1068,8 +1076,8 @@ var SpaceShip = function () {
     this.height = height;
     this.prevX = x;
     this.prevY = y;
-    this.x = x;
-    this.y = y;
+    this.x = x - width / 2;
+    this.y = y - height / 2;
     this.ctx = ctx;
     this.color = color;
     this.id = id;
@@ -1077,10 +1085,12 @@ var SpaceShip = function () {
     this.momentum = 100;
     this.angle = angle;
     this.display = display;
-    this.acceleration = acceleration;
+    this.accelerationX = accelerationX;
+    this.accelerationY = accelerationY;
+    this.vectors = vectors;
     this.moveX = moveX;
     this.moveY = moveY;
-    this.grid = new _Grid2.default({ ctx: ctx, x: 0, y: 0, width: 100, height: 100, padding: 10, color: 'red' });
+    this.grid = new _Grid2.default({ ctx: ctx, x: 0, y: 0, width: 200, height: 200, padding: 10, color: 'red' });
     //this.info = new TextBox(ctx, x, y, 'deg: 0, x:0, y:0', '12px arial', true, id = 'info');
   }
 
@@ -1100,36 +1110,65 @@ var SpaceShip = function () {
           viewAmplitude = _viewAmplitude === undefined ? 50 : _viewAmplitude;
 
       ctx.save(); //save angle
-
       ctx.beginPath();
-      ctx.translate(x, y);
-      ctx.rotate(this.angle * Math.PI / 180);
+      ctx.translate(0, 0);
+      ctx.scale(1, -1);
+      ctx.rotate(angle);
       ctx.fillStyle = color;
-      ctx.fillRect(x, y, width, height);
-      ctx.closePath(); //ship    
-
-      ctx.beginPath();
-      ctx.strokeStyle = 'white';
-      ctx.lineWidth = 1;
-      ctx.arc(0, 0, width * 1.5, 0, 2 * Math.PI);
-      ctx.stroke();
-      ctx.closePath(); //arc bound 
+      ctx.fillRect(x + -(width / 2), y + -(height / 2), width, height);
       //this.grid.render();
-
+      ctx.closePath(); //ship    
       ctx.restore(); //restore angle
 
       /*
-      this.info.x = this.x+(this.width/2);
-      this.info.y = this.y+(this.height);  
-      this.info.data = `deg: ${ Math.floor(this.dtAngle) }, x: ${ Math.floor(this.x) }, y: ${ Math.floor(this.y) }`;           
-      this.info.render(); 
+      ctx.beginPath();
+      ctx.strokeStyle = 'white';
+      ctx.lineWidth = 1;
+      ctx.arc(x, -y, width * 1.5, 0, 2 * Math.PI);
+      ctx.stroke();    
+      ctx.closePath();//arc bound 
+      ctx.restore();//restore angle
       */
     }
   }, {
     key: 'update',
     value: function update() {
+      var vectors = this.vectors;
+      var _iteratorNormalCompletion = true;
+      var _didIteratorError = false;
+      var _iteratorError = undefined;
 
-      this.x += this.acceleration;
+      try {
+        for (var _iterator = (0, _getIterator3.default)(vectors), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+          var vector = _step.value;
+
+          var vectorX = vector.x;
+          var vectorY = vector.y;
+          //this.x = Math.round(vector.magnitude * Math.cos(vector.direction));
+          //this.y = Math.round(vector.magnitude * Math.sin(vector.direction));           
+          var masa = this.width * this.height;
+          this.accelerationX = Math.round(vectorX.magnitude * Math.cos(vectorX.direction)) / masa;
+          this.accelerationY = Math.round(vectorY.magnitude * Math.sin(vectorY.direction)) / masa;
+          this.x += this.accelerationX;
+          this.y += this.accelerationY;
+          //this.angle = -50//Math.sqrt(Math.pow(vectorX.magnitude, 2) + Math.pow(vectorY.magnitude, 2));
+          //console.log(this.angle)
+        }
+        //this.angle += 0.5;
+      } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion && _iterator.return) {
+            _iterator.return();
+          }
+        } finally {
+          if (_didIteratorError) {
+            throw _iteratorError;
+          }
+        }
+      }
 
       if (this.bound) {
         if (this.prevX < this.x) this.x += this.momentum / 100;
@@ -1138,7 +1177,6 @@ var SpaceShip = function () {
         if (this.prevY > this.y) this.y -= this.momentum / 100;
         this.momentum -= 1;
       }
-
       if (this.momentum <= 0) {
         this.bound = false;
         this.momentum = 100;
@@ -1249,8 +1287,9 @@ var Universe = function () {
         ctx.beginPath();
         var x = canvas.width / 2;
         var y = canvas.height / 2;
-        //ctx.translate(x, y);
-        //this.drawCroos();
+        ctx.translate(x, y);
+        //ctx.scale(1, -1);
+        _this.drawCroos();
         _this.update();
         ctx.closePath();
         ctx.restore();
@@ -1270,20 +1309,10 @@ var Universe = function () {
     key: 'update',
     value: function update() {
       this.stage.render();
-      var vectorX = this.stage.find('mainMask').find('vectorX');
-      var info = this.stage.find('mainMask').find('info');
-      //vectorX.direction+=0.5;
-      info.data = 'deg: ' + vectorX.direction + ', x: ' + vectorX.convertX + ', y: ' + vectorX.convertY;
-
-      //let nav = this.stage.find('mainMask').find('nav');
-      //let vectorX = this.stage.find('mainMask').find('vectorX'); 
-      //nav.angle = 45;
-      /*
-      vectorX.refs.forEach(ref => {
-        ref.angle = vectorX.direction;
-        ref.acceleration = vectorX.magnitude*0.005;
-      })
-      */
+      //let vectorX = this.stage.find('mainMask').find('vectorX');        
+      //let info = this.stage.find('mainMask').find('info');        
+      //vectorX.direction+=0.005;
+      //info.data = `deg: ${vectorX.direction}, x: ${vectorX.convertX}, y: ${vectorX.convertY}`;
     }
   }, {
     key: 'moveEvent',
@@ -1295,20 +1324,6 @@ var Universe = function () {
       nav.x += momentumX / 10;
       nav.y += momentumY / 10;
       nav.bound = true;
-    }
-  }, {
-    key: 'updateAngle',
-    value: function updateAngle(clientX, clientY) {
-      var _calcCartesiano = (0, _index.calcCartesiano)(clientX, clientY, canvas),
-          x = _calcCartesiano.x,
-          y = _calcCartesiano.y;
-
-      var nav = this.stage.find('nav');
-      //let info = this.stage.find('info');     
-      var deg = (0, _index.coordidatesToDeg)(x, y);
-      //let message = `deg: ${ Math.floor(deg) }, x: ${ x }, y: ${ y }`;
-      //info.data = message;
-      nav.angle = deg;
     }
   }, {
     key: 'moveVectorNav',
@@ -1333,112 +1348,87 @@ var Universe = function () {
 
         this.addSpot(x, y);
       } else {
-        var _getMousePos2 = (0, _index.getMousePos)(canvas, e),
-            _x2 = _getMousePos2.x,
-            _y = _getMousePos2.y;
-
+        var mousePos = (0, _index.getMousePos)(canvas, e);
         var id = (0, _index.guid)();
-        this.addSpot(_x2 - canvas.width / 2, _y - canvas.height / 2, id);
-        var nav = this.stage.find('mainMask').find('nav');
-        var spot = this.stage.find(id);
-        var deg = (0, _index.coordidatesToDeg)(spot.x + canvas.width / 2, spot.y + canvas.width / 2);
-        nav.vectors[0].direction = deg;
-        console.log(deg);
+        var calc = (0, _index.calcCartesiano)(mousePos.x, mousePos.y, canvas);
+        var deg = (0, _index.coordidatesToDeg)(calc.x, calc.y);
+        var mainMask = this.stage.find('mainMask');
+        var vectorX = mainMask.find('vectorX');
+        var vectorY = mainMask.find('vectorY');
+        vectorX.magnitude = 200;
+        vectorY.magnitude = 200;
+        vectorX.direction = deg * Math.PI / 180;
+        vectorY.direction = deg * Math.PI / 180;
+        var info = this.stage.find('mainMask').find('info');
+        info.data = 'deg: ' + Math.floor(deg) + ', x: ' + calc.x + ', y: ' + calc.y;
+        this.addSpot(calc.x, -calc.y, id);
       }
     }
   }, {
     key: 'preload',
     value: function preload() {
-      this.stage = new _Stage2.default(canvas, true);
-      /*
-      let calc = (canvas.height + canvas.width) / 2;    
-      this.sectors.push(
-        new Grid({
-          ctx,
-          x: 0,
-          y: 0,
-          width: calc,
-          height: calc,
-          padding: calc/50,
-          color: 'rgba(255, 220, 0, 0.5)',
-          id: 'SECTOR1'
-        }),
-        new Grid({
-          ctx,
-          x: -calc,
-          y: 0,
-          width: calc,
-          height: calc,
-          padding: calc/50,
-          color: 'rgba(65, 220, 150, 0.5)',
-          id: 'SECTOR2'
-        }),
-        new Grid({
-          ctx,
-          x: -calc,
-          y: -calc,
-          width: calc,
-          height: calc,
-          padding: calc/50,
-          color: 'rgba(100, 220, 0, 0.5)',
-          id: 'SECTOR3'
-        }),            
-        new Grid({
-          ctx,
-          x: 0,
-          y: -calc,
-          width: calc,
-          height: calc,
-          padding: calc/50,
-          color: 'rgba(100, 220, 0, 0.5)',
-          id: 'SECTOR3'
-        }),            
-      )  
-      */
-      //for (let sector of this.sectors) this.stage.push(sector);         
+      var _this2 = this;
 
+      this.stage = new _Stage2.default(canvas, true);
       var vectorX = new _Vector2.default({
         ctx: ctx,
         x: 0,
         y: 0,
-        magnitude: 5.65, //gap 
-        direction: 0.1,
-        id: 'vectorX'
+        magnitude: 1050,
+        direction: 0,
+        id: 'vectorX',
+        canvas: canvas,
+        color: 'yellow'
       });
-      this.stage.find('mainMask').push(vectorX);
 
-      /*
-      let nav = new SpaceShip({
-        width: 15, 
-        height: 15, 
-        x: 0, 
-        y: 0,  
-        ctx, 
-        color: 'white', 
+      var vectorY = new _Vector2.default({
+        ctx: ctx,
+        x: 0,
+        y: 0,
+        magnitude: 850,
+        direction: 90,
+        id: 'vectorY',
+        canvas: canvas,
+        color: 'green'
+      });
+
+      var mainMask = this.stage.find('mainMask');
+      mainMask.push(vectorX);
+      mainMask.push(vectorY);
+
+      var nav = new _SpaceShip2.default({
+        width: 15,
+        height: 15,
+        x: 0,
+        y: 0,
+        ctx: ctx,
+        color: 'white',
         id: 'nav',
-        angle: 45
-      })    
-      this.stage.find('mainMask').push(nav);    
-      */
+        angle: 0 * Math.PI / 180,
+        vectors: [{ x: vectorX, y: vectorY }]
+      });
+      this.stage.find('mainMask').push(nav);
 
       //let onMove = this.moveEvent.bind(this);
       var viewport = this.stage.find('mainMask').find('info');
       canvas.addEventListener('mousemove', function (e) {
         var mousePos = (0, _index.getMousePos)(canvas, e);
-        var deg = (0, _index.coordidatesToDeg)(mousePos.x, mousePos.y);
-        viewport.data = 'deg: ' + Math.floor(deg) + ', x: ' + mousePos.x + ', y: ' + mousePos.y;
+        var calc = (0, _index.calcCartesiano)(mousePos.x, mousePos.y, canvas);
+        var deg = (0, _index.coordidatesToDeg)(calc.x, calc.y);
+        var vectorX = _this2.stage.find('mainMask').find('vectorX');
+        var vectorY = _this2.stage.find('mainMask').find('vectorY');
+        vectorX.direction = deg * Math.PI / 180;
+        vectorY.direction = deg * Math.PI / 180;
+        viewport.data = 'deg: ' + Math.floor(deg) + ', x: ' + calc.x + ', y: ' + calc.y;
+
         /*
-        let {x, y} = calcCartesiano(mousePos.x, mousePos.y, canvas);     
-        let info = this.stage.find('mainMask').find('info');
-        let deg = coordidatesToDeg(x, y);
-        info.data = `deg: ${Math.floor(deg)} x: ${Math.floor(x)}, y: ${Math.floor(y)}`;  
         this.moveVectorNav(deg);
         */
       });
 
       //this.controls = new Controls({stage: this.stage, canvas, onMove}, true);
       //canvas.addEventListener("touchstart", this.markSpot.bind(this));
-      //canvas.addEventListener("mouseup", this.markSpot.bind(this));
+      canvas.addEventListener("mouseup", this.markSpot.bind(this));
     }
   }, {
     key: 'addSpot',
@@ -1446,7 +1436,8 @@ var Universe = function () {
       var id = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : (0, _index.guid)();
 
       var spot = new _Spot2.default({ x: x, y: y, ctx: ctx, display: true, size: 10, id: id });
-      this.stage.layers.push(spot);
+      var mainMask = this.stage.find('mainMask');
+      mainMask.push(spot);
     }
   }]);
   return Universe;
@@ -2497,8 +2488,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 var Vector = function () {
   function Vector(_ref) {
     var ctx = _ref.ctx,
-        x = _ref.x,
-        y = _ref.y,
+        _ref$size = _ref.size,
+        size = _ref$size === undefined ? 5 : _ref$size,
         canvas = _ref.canvas,
         magnitude = _ref.magnitude,
         _ref$direction = _ref.direction,
@@ -2507,17 +2498,19 @@ var Vector = function () {
         _ref$display = _ref.display,
         display = _ref$display === undefined ? true : _ref$display,
         _ref$refs = _ref.refs,
-        refs = _ref$refs === undefined ? [] : _ref$refs;
+        refs = _ref$refs === undefined ? [] : _ref$refs,
+        _ref$color = _ref.color,
+        color = _ref$color === undefined ? 'red' : _ref$color;
     (0, _classCallCheck3.default)(this, Vector);
 
     this.ctx = ctx;
-    //this.x = magnitude * Math.cos(direction);
-    //this.y = magnitude * Math.sin(direction);
     this.canvas = canvas;
-    this.x = x;
-    this.y = y;
+    this.color = color;
     this.magnitude = magnitude;
-    this.direction = direction; //* 180 / Math.PI;
+    this.direction = direction * Math.PI / 180;
+    this.x = Math.round(magnitude * Math.cos(this.direction));
+    this.y = Math.round(magnitude * Math.sin(this.direction));
+    this.size = size;
     this.id = id;
     this.display = display;
     this.refs = refs;
@@ -2534,64 +2527,74 @@ var Vector = function () {
     key: 'drawHead',
     value: function drawHead() {
       var ctx = this.ctx,
+          x = this.x,
+          y = this.y,
+          size = this.size,
           magnitude = this.magnitude,
           direction = this.direction,
-          x = this.x,
-          y = this.y;
+          color = this.color;
 
-      ctx.fillStyle = 'red';
-      var size = 5;
+      ctx.save();
+      ctx.scale(1, -1);
+      ctx.translate(x, y);
+      ctx.rotate(direction);
+
       ctx.beginPath();
-      ctx.lineWidth = 1;
-      ctx.lineTo(x - size, y + magnitude);
-      ctx.lineTo(x + size, y + magnitude);
-      ctx.lineTo(x, y + magnitude - size * 2); //right close 
-      ctx.lineTo(x - size, y + magnitude); //left close
+      ctx.fillStyle = color;
+      //ctx.strokeStyle = 'yellow';
+      //ctx.strokeRect(0, -5, 10, 10);//head
+
+      ctx.moveTo(0, size);
+      ctx.lineTo(0, -size);
+      ctx.lineTo(size, 0);
       ctx.fill();
       ctx.closePath();
+      ctx.restore();
     }
   }, {
-    key: 'render',
-    value: function render() {
+    key: 'drawTail',
+    value: function drawTail() {
       var ctx = this.ctx,
           magnitude = this.magnitude,
           direction = this.direction,
           x = this.x,
           y = this.y,
-          canvas = this.canvas;
-      //let calcCart = calcCartesiano(x, y, canvas);     
+          canvas = this.canvas,
+          color = this.color;
 
       ctx.save();
+      ctx.translate(0, 0);
+      ctx.scale(1, -1);
       ctx.beginPath();
-      ctx.translate(200, 200);
-      //ctx.rotate(direction * Math.PI / 180);
-      //this.grid.render();
 
-      ctx.fillStyle = 'white';
-      ctx.fillRect(x, y, 10, 10); //ancla 
+      //ctx.fillStyle = color;
+      //ctx.fillRect(0, 0, 10, 10);//ancla 
+      ctx.lineTo(0, 0);
       ctx.lineTo(x, y);
-
-      ctx.fillStyle = 'blue';
-      ctx.strokeStyle = 'red';
-
-      //this.y = magnitude * Math.sin(direction);
-      var convertX = Math.round(magnitude * Math.cos(direction));
-      var convertY = Math.round(magnitude * Math.sin(direction));
-      this.convertX = convertX;
-      this.convertY = convertY;
-      ctx.fillRect(convertX, convertY, 10, 10); //head 
-      ctx.lineTo(convertX, convertY); //head 
+      ctx.lineCap = "round";
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = color;
       ctx.stroke();
-      //ctx.fillRect(x, y, 10, 10);
-      //ctx.lineTo(x, y);  
-      //ctx.lineTo(x, y+(magnitude));  
-      //ctx.strokeStyle = 'red';
-      //ctx.lineCap="round";
-      //ctx.lineWidth = 2;
-      //ctx.stroke();
-      //this.drawHead();
       ctx.closePath();
       ctx.restore();
+    }
+  }, {
+    key: 'update',
+    value: function update() {
+      var magnitude = this.magnitude,
+          direction = this.direction;
+
+      this.x = Math.round(magnitude * Math.cos(direction));
+      this.y = Math.round(magnitude * Math.sin(direction));
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      var ctx = this.ctx;
+
+      this.update();
+      this.drawTail();
+      this.drawHead();
     }
   }]);
   return Vector;
@@ -2652,6 +2655,8 @@ var Stage = function () {
     this.x = 0;
     this.y = 0;
     this.layers = [new _Viewport2.default({
+      x: -canvas.width / 2,
+      y: -canvas.height / 2,
       ctx: ctx,
       canvas: canvas,
       id: 'mainMask'
@@ -2936,13 +2941,18 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 var Spot = function () {
   function Spot(_ref) {
     var ctx = _ref.ctx,
-        x = _ref.x,
-        y = _ref.y,
-        size = _ref.size,
-        color = _ref.color,
+        _ref$x = _ref.x,
+        x = _ref$x === undefined ? 0 : _ref$x,
+        _ref$y = _ref.y,
+        y = _ref$y === undefined ? 0 : _ref$y,
+        _ref$size = _ref.size,
+        size = _ref$size === undefined ? 10 : _ref$size,
+        _ref$color = _ref.color,
+        color = _ref$color === undefined ? 'green' : _ref$color,
         _ref$id = _ref.id,
         id = _ref$id === undefined ? '' : _ref$id,
-        display = _ref.display;
+        _ref$display = _ref.display,
+        display = _ref$display === undefined ? true : _ref$display;
     (0, _classCallCheck3.default)(this, Spot);
 
     this.ctx = ctx;
@@ -3098,6 +3108,10 @@ var Viewport = function () {
   function Viewport(_ref) {
     var ctx = _ref.ctx,
         canvas = _ref.canvas,
+        _ref$x = _ref.x,
+        x = _ref$x === undefined ? 0 : _ref$x,
+        _ref$y = _ref.y,
+        y = _ref$y === undefined ? 0 : _ref$y,
         _ref$id = _ref.id,
         id = _ref$id === undefined ? (0, _index.guid)() : _ref$id,
         _ref$display = _ref.display,
@@ -3113,15 +3127,15 @@ var Viewport = function () {
     var width = this.width = this.canvas.width * 0.9;
     var height = this.height = this.canvas.height * 0.9;
     var center = this.center = (0, _index.calcCenter)(canvas, { height: height, width: width });
-    this.x = center.x;
-    this.y = center.y;
+    this.x = x;
+    this.y = y;
     this.id = id;
     this.display = display;
     this.layers = layers;
     this.layers.push(new _TextBox2.default({
       ctx: ctx,
-      x: this.x + 10,
-      y: this.y + 20,
+      x: 0,
+      y: 50,
       data: 'deg: 0, x: 0, y: 0',
       font: '12px arial',
       id: 'info'
@@ -3151,14 +3165,15 @@ var Viewport = function () {
           width = this.width,
           height = this.height,
           display = this.display,
-          layers = this.layers;
+          layers = this.layers,
+          center = this.center;
 
       if (!display) return;
       ctx.save();
       ctx.beginPath();
       ctx.strokeStyle = 'red';
-      ctx.strokeRect(x, y, width, height);
-      ctx.rect(x, y, width, height);
+      ctx.strokeRect(x + center.x, y + center.y, width, height);
+      ctx.rect(x + center.x, y + center.y, width, height);
       //ctx.clip();
       var _iteratorNormalCompletion = true;
       var _didIteratorError = false;

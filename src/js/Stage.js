@@ -16,6 +16,8 @@ export default class Stage {
     this.y = 0;
     this.layers = [      
       new Viewport({
+        x: -canvas.width/2,
+        y: -canvas.height/2,
         ctx, 
         canvas, 
         id : 'mainMask'

@@ -35,7 +35,7 @@ export const calcCartesiano = (candidateX, candidateY, canvas) => {
 }
 
 export const coordidatesToDeg = (x, y) => {
-  let rad = Math.atan2(x, y);
+  let rad = Math.atan2(y, x);
   let deg = rad * 360 / (2* Math.PI);
   return deg;
 }

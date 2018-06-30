@@ -1,5 +1,5 @@
 export default class Spot {
-  constructor({ctx, x, y, size, color, id = '', display}) {
+  constructor({ctx, x = 0, y = 0, size = 10, color  = 'green', id = '', display = true}) {
     this.ctx = ctx;
     this.size = size;
     this.x = x;

@@ -1,15 +1,14 @@
 import Grid from './Grid.js'
-
 export default class Vector {
-  constructor({ctx, x, y, canvas, magnitude, direction = 0, id, display = true, refs = []}) {
+  constructor({ctx, size = 5, canvas, magnitude, direction = 0, id, display = true, refs = [], color = 'red'}) {
     this.ctx = ctx;
-    //this.x = magnitude * Math.cos(direction);
-    //this.y = magnitude * Math.sin(direction);
     this.canvas = canvas;
-    this.x = x;
-    this.y = y;
+    this.color = color;
     this.magnitude = magnitude;
-    this.direction = direction //* 180 / Math.PI;
+    this.direction = direction * Math.PI / 180;
+    this.x = Math.round(magnitude * Math.cos(this.direction));
+    this.y = Math.round(magnitude * Math.sin(this.direction));
+    this.size = size;
     this.id = id;
     this.display = display;
     this.refs = refs;
@@ -23,53 +22,54 @@ export default class Vector {
   }
 
   drawHead() {
-    let { ctx, magnitude, direction, x, y } = this;
-    ctx.fillStyle = 'red';
-    let size = 5;
+    let { ctx, x, y, size, magnitude, direction, color } = this;
+    ctx.save();    
+    ctx.scale(1, -1);    
+    ctx.translate(x, y);
+    ctx.rotate(direction);
+    
     ctx.beginPath();
-    ctx.lineWidth = 1;    
-    ctx.lineTo(x-size, y+(magnitude));
-    ctx.lineTo(x+size, y+(magnitude));
-    ctx.lineTo(x, y+(magnitude)-(size*2));//right close 
-    ctx.lineTo(x-size, y+(magnitude));//left close
+    ctx.fillStyle = color;
+    //ctx.strokeStyle = 'yellow';
+    //ctx.strokeRect(0, -5, 10, 10);//head
+
+    ctx.moveTo(0, size);
+    ctx.lineTo(0, -size);
+    ctx.lineTo(size, 0);
     ctx.fill();
     ctx.closePath();
+    ctx.restore();
+  }
+
+  drawTail() {
+    let { ctx, magnitude, direction, x, y, canvas, color } = this;
+    ctx.save();    
+    ctx.translate(0, 0);
+    ctx.scale(1, -1);    
+    ctx.beginPath();
+
+    //ctx.fillStyle = color;
+    //ctx.fillRect(0, 0, 10, 10);//ancla 
+    ctx.lineTo(0, 0);
+    ctx.lineTo(x, y);
+    ctx.lineCap="round";
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = color;
+    ctx.stroke();
+    ctx.closePath();
+    ctx.restore();    
+  }
+
+  update() {
+    let { magnitude, direction } = this;
+    this.x = Math.round(magnitude * Math.cos(direction));
+    this.y = Math.round(magnitude * Math.sin(direction));    
   }
 
   render() {
-    let { ctx, magnitude, direction, x, y, canvas } = this;
-    //let calcCart = calcCartesiano(x, y, canvas);     
-    ctx.save();
-    ctx.beginPath();
-    ctx.translate(200, 200)
-    //ctx.rotate(direction * Math.PI / 180);
-    //this.grid.render();
-
-    ctx.fillStyle = 'white';
-    ctx.fillRect(x, y, 10, 10);//ancla 
-    ctx.lineTo(x, y);
-
-    ctx.fillStyle = 'blue';
-    ctx.strokeStyle = 'red';
-    
-    //this.y = magnitude * Math.sin(direction);
-    let convertX = Math.round(magnitude * Math.cos(direction));
-    let convertY = Math.round(magnitude * Math.sin(direction));
-    this.convertX = convertX;
-    this.convertY = convertY;
-    ctx.fillRect(convertX, convertY, 10, 10);//head 
-    ctx.lineTo(convertX, convertY);//head 
-    ctx.stroke();
-    //ctx.fillRect(x, y, 10, 10);
-    //ctx.lineTo(x, y);  
-    //ctx.lineTo(x, y+(magnitude));  
-    //ctx.strokeStyle = 'red';
-    //ctx.lineCap="round";
-    //ctx.lineWidth = 2;
-    //ctx.stroke();
-    //this.drawHead();
-    ctx.closePath();
-    ctx.restore();
-
+    let { ctx } = this;
+    this.update();
+    this.drawTail();
+    this.drawHead();
   }
 }

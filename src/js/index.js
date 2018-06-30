@@ -40,8 +40,9 @@ class Universe {
       ctx.beginPath();
       let x = canvas.width/2;
       let y = canvas.height/2;
-      //ctx.translate(x, y);
-      //this.drawCroos();
+      ctx.translate(x, y);
+      //ctx.scale(1, -1);
+      this.drawCroos();
       this.update();
       ctx.closePath();
       ctx.restore();
@@ -59,20 +60,10 @@ class Universe {
 
   update() {
     this.stage.render();
-    let vectorX = this.stage.find('mainMask').find('vectorX');        
-    let info = this.stage.find('mainMask').find('info');        
-    //vectorX.direction+=0.5;
-    info.data = `deg: ${vectorX.direction}, x: ${vectorX.convertX}, y: ${vectorX.convertY}`;
-
-    //let nav = this.stage.find('mainMask').find('nav');
-    //let vectorX = this.stage.find('mainMask').find('vectorX'); 
-    //nav.angle = 45;
-    /*
-    vectorX.refs.forEach(ref => {
-      ref.angle = vectorX.direction;
-      ref.acceleration = vectorX.magnitude*0.005;
-    })
-    */
+    //let vectorX = this.stage.find('mainMask').find('vectorX');        
+    //let info = this.stage.find('mainMask').find('info');        
+    //vectorX.direction+=0.005;
+    //info.data = `deg: ${vectorX.direction}, x: ${vectorX.convertX}, y: ${vectorX.convertY}`;
   }
 
   moveEvent(handler) {
@@ -83,16 +74,6 @@ class Universe {
     nav.x += momentumX/10;
     nav.y += momentumY/10;
     nav.bound = true;
-  }
-
-  updateAngle(clientX, clientY) {
-    let {x, y} = calcCartesiano(clientX, clientY, canvas);
-     let nav = this.stage.find('nav');      
-     //let info = this.stage.find('info');     
-     let deg = coordidatesToDeg(x, y);
-     //let message = `deg: ${ Math.floor(deg) }, x: ${ x }, y: ${ y }`;
-     //info.data = message;
-     nav.angle = deg;
   }
 
   moveVectorNav(deg = 0) {
@@ -107,78 +88,52 @@ class Universe {
       let { x, y } = getMousePos(canvas, e);
       this.addSpot(x, y);
     } else {
-      let { x, y } = getMousePos(canvas, e);
+      let mousePos = getMousePos(canvas, e);
       let id = guid();
-      this.addSpot(x - canvas.width/2, y - canvas.height/2, id);
-      let nav = this.stage.find('mainMask').find('nav');
-      let spot = this.stage.find(id)      
-      let deg = coordidatesToDeg(spot.x + (canvas.width/2), spot.y + (canvas.width/2));
-      nav.vectors[0].direction = deg;
-      console.log(deg)
+      let  calc = calcCartesiano(mousePos.x, mousePos.y, canvas);
+      let deg = coordidatesToDeg(calc.x, calc.y);
+      const mainMask = this.stage.find('mainMask');
+      let vectorX = mainMask.find('vectorX');
+      let vectorY = mainMask.find('vectorY');
+      vectorX.magnitude = 200;
+      vectorY.magnitude = 200;
+      vectorX.direction = deg * Math.PI / 180;
+      vectorY.direction = deg * Math.PI / 180;     
+      let info = this.stage.find('mainMask').find('info'); 
+      info.data = `deg: ${Math.floor(deg)}, x: ${calc.x}, y: ${calc.y}`;      
+      this.addSpot(calc.x, -calc.y, id);
     }   
   }
   
 
   preload() {
     this.stage = new Stage(canvas, true);  
-    /*
-    let calc = (canvas.height + canvas.width) / 2;    
-    this.sectors.push(
-      new Grid({
-        ctx,
-        x: 0,
-        y: 0,
-        width: calc,
-        height: calc,
-        padding: calc/50,
-        color: 'rgba(255, 220, 0, 0.5)',
-        id: 'SECTOR1'
-      }),
-      new Grid({
-        ctx,
-        x: -calc,
-        y: 0,
-        width: calc,
-        height: calc,
-        padding: calc/50,
-        color: 'rgba(65, 220, 150, 0.5)',
-        id: 'SECTOR2'
-      }),
-      new Grid({
-        ctx,
-        x: -calc,
-        y: -calc,
-        width: calc,
-        height: calc,
-        padding: calc/50,
-        color: 'rgba(100, 220, 0, 0.5)',
-        id: 'SECTOR3'
-      }),            
-      new Grid({
-        ctx,
-        x: 0,
-        y: -calc,
-        width: calc,
-        height: calc,
-        padding: calc/50,
-        color: 'rgba(100, 220, 0, 0.5)',
-        id: 'SECTOR3'
-      }),            
-    )  
-    */
-    //for (let sector of this.sectors) this.stage.push(sector);         
-
     let vectorX = new Vector({
       ctx, 
       x: 0,
       y: 0,
-      magnitude: 5.65,//gap 
-      direction: 0.1,
-      id: 'vectorX'
+      magnitude: 1050, 
+      direction: 0,
+      id: 'vectorX',
+      canvas,
+      color: 'yellow'
     })
-    this.stage.find('mainMask').push(vectorX);        
-    
-    /*
+
+    let vectorY = new Vector({
+      ctx, 
+      x: 0,
+      y: 0,
+      magnitude: 850, 
+      direction: 90,
+      id: 'vectorY',
+      canvas,
+      color: 'green'
+    })
+
+    const mainMask = this.stage.find('mainMask')
+    mainMask.push(vectorX);        
+    mainMask.push(vectorY);        
+        
     let nav = new SpaceShip({
       width: 15, 
       height: 15, 
@@ -187,34 +142,37 @@ class Universe {
       ctx, 
       color: 'white', 
       id: 'nav',
-      angle: 45
+      angle: 0 * Math.PI /180,
+      vectors:[{x: vectorX, y: vectorY}]
     })    
     this.stage.find('mainMask').push(nav);    
-    */
 
     //let onMove = this.moveEvent.bind(this);
     let viewport = this.stage.find('mainMask').find('info');
     canvas.addEventListener('mousemove', e => {
       let mousePos = getMousePos(canvas, e);
-      let deg = coordidatesToDeg(mousePos.x, mousePos.y);
-      viewport.data = `deg: ${Math.floor(deg)}, x: ${mousePos.x}, y: ${mousePos.y}`;
+      let  calc = calcCartesiano(mousePos.x, mousePos.y, canvas);
+      let deg = coordidatesToDeg(calc.x, calc.y);
+      let vectorX = this.stage.find('mainMask').find('vectorX');
+      let vectorY = this.stage.find('mainMask').find('vectorY');
+      vectorX.direction = deg * Math.PI / 180;
+      vectorY.direction = deg * Math.PI / 180;      
+      viewport.data = `deg: ${Math.floor(deg)}, x: ${calc.x}, y: ${calc.y}`;      
+
       /*
-      let {x, y} = calcCartesiano(mousePos.x, mousePos.y, canvas);     
-      let info = this.stage.find('mainMask').find('info');
-      let deg = coordidatesToDeg(x, y);
-      info.data = `deg: ${Math.floor(deg)} x: ${Math.floor(x)}, y: ${Math.floor(y)}`;  
       this.moveVectorNav(deg);
       */
     })
 
     //this.controls = new Controls({stage: this.stage, canvas, onMove}, true);
     //canvas.addEventListener("touchstart", this.markSpot.bind(this));
-    //canvas.addEventListener("mouseup", this.markSpot.bind(this));
+    canvas.addEventListener("mouseup", this.markSpot.bind(this));
   }
 
   addSpot(x, y, id = guid()) {
     let spot = new Spot({x, y, ctx, display: true, size: 10, id});
-    this.stage.layers.push(spot);    
+    const mainMask = this.stage.find('mainMask')
+    mainMask.push(spot);    
   }
 }
 
