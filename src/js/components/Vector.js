@@ -1,6 +1,6 @@
 import Grid from './Grid.js'
 export default class Vector {
-  constructor({ctx, size = 5, canvas, magnitude, direction = 0, id, display = true, refs = [], color = 'red'}) {
+  constructor({ctx, translateX = 0, translateY = 0, size = 5, canvas, magnitude, direction = 0, id, display = true, refs = [], color = 'red'}) {
     this.ctx = ctx;
     this.canvas = canvas;
     this.color = color;
@@ -8,6 +8,8 @@ export default class Vector {
     this.direction = direction * Math.PI / 180;
     this.x = Math.round(magnitude * Math.cos(this.direction));
     this.y = Math.round(magnitude * Math.sin(this.direction));
+    this.translateX = translateX;
+    this.translateY = translateY;
     this.size = size;
     this.id = id;
     this.display = display;
@@ -22,10 +24,10 @@ export default class Vector {
   }
 
   drawHead() {
-    let { ctx, x, y, size, magnitude, direction, color } = this;
+    let { ctx, x, y, size, magnitude, translateX, translateY, direction, color } = this;
     ctx.save();    
     ctx.scale(1, -1);    
-    ctx.translate(x, y);
+    ctx.translate(x + translateX, y + translateY);
     ctx.rotate(direction);
     
     ctx.beginPath();
@@ -42,16 +44,17 @@ export default class Vector {
   }
 
   drawTail() {
-    let { ctx, magnitude, direction, x, y, canvas, color } = this;
+    let { ctx, magnitude, direction, x, y, translateX, translateY, canvas, color } = this;
     ctx.save();    
-    ctx.translate(0, 0);
     ctx.scale(1, -1);    
+    ctx.translate(translateX, translateY);
     ctx.beginPath();
 
     //ctx.fillStyle = color;
     //ctx.fillRect(0, 0, 10, 10);//ancla 
     ctx.lineTo(0, 0);
-    ctx.lineTo(x, y);
+    ctx.lineTo(x , y);
+    
     ctx.lineCap="round";
     ctx.lineWidth = 2;
     ctx.strokeStyle = color;

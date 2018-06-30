@@ -105,48 +105,53 @@ class Universe {
     }   
   }
   
+  generateVectorY(magnitude = 0, id) {
+    const mainMask = this.stage.find('mainMask')
+    let vectorY = new Vector({
+      ctx, 
+      magnitude, 
+      direction: 90,
+      canvas,
+      id: id || guid(),
+      color: 'red'
+    })           
+    mainMask.push(vectorY);   
+    return {y: vectorY}
+  }
+
+  generateVectorX(magnitude = 0, id) {
+    const mainMask = this.stage.find('mainMask')
+    let vectorX = new Vector({
+      ctx, 
+      magnitude, 
+      direction: 0,
+      canvas,
+      id: id || guid(),
+      color: 'blue'
+    })           
+    mainMask.push(vectorX);   
+    return {x: vectorX}
+  }
 
   preload() {
     this.stage = new Stage(canvas, true);  
-    let vectorX = new Vector({
-      ctx, 
-      x: 0,
-      y: 0,
-      magnitude: 1050, 
-      direction: 0,
-      id: 'vectorX',
-      canvas,
-      color: 'yellow'
-    })
+    let newVectorY1 = this.generateVectorY(100, 'vectorX');    
+    let newVectorX1 = this.generateVectorX(100, 'vectorY');    
 
-    let vectorY = new Vector({
-      ctx, 
-      x: 0,
-      y: 0,
-      magnitude: 850, 
-      direction: 90,
-      id: 'vectorY',
-      canvas,
-      color: 'green'
-    })
-
-    const mainMask = this.stage.find('mainMask')
-    mainMask.push(vectorX);        
-    mainMask.push(vectorY);        
-        
     let nav = new SpaceShip({
-      width: 15, 
-      height: 15, 
-      x: 0, 
-      y: 0,  
+      width: 20, 
+      height: 20, 
+      x: 10, 
+      y: 10,  
       ctx, 
       color: 'white', 
       id: 'nav',
       angle: 0 * Math.PI /180,
-      vectors:[{x: vectorX, y: vectorY}]
+      vectors: [newVectorY1, newVectorX1]
     })    
-    this.stage.find('mainMask').push(nav);    
 
+    this.stage.find('mainMask').push(nav);    
+    
     //let onMove = this.moveEvent.bind(this);
     let viewport = this.stage.find('mainMask').find('info');
     canvas.addEventListener('mousemove', e => {

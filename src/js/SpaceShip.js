@@ -61,10 +61,27 @@ export default class SpaceShip {
       //this.x = Math.round(vector.magnitude * Math.cos(vector.direction));
       //this.y = Math.round(vector.magnitude * Math.sin(vector.direction));           
       let masa = this.width * this.height;
-      this.accelerationX = Math.round(vectorX.magnitude * Math.cos(vectorX.direction)) / masa; 
-      this.accelerationY = Math.round(vectorY.magnitude * Math.sin(vectorY.direction)) / masa;           
-      this.x += this.accelerationX;
-      this.y += this.accelerationY;
+      if(vectorX) {
+        this.accelerationX = Math.round(vectorX.magnitude * Math.cos(vectorX.direction)) / masa;   
+        this.x += this.accelerationX;
+        vectorX.translateX = this.x;
+        vectorX.translateY = this.y;
+      }
+
+      if(vectorY) {
+        this.accelerationY = Math.round(vectorY.magnitude * Math.sin(vectorY.direction)) / masa;                 
+        this.y += this.accelerationY;          
+        /*
+        let reachPoint = (this.y > Math.round(vectorY.magnitude * Math.sin(vectorY.direction)))
+        if(!reachPoint) {
+          this.y += this.accelerationY;          
+        } else {
+          vectorY.display = false;
+        }
+        */
+        vectorY.translateX = this.x;
+        vectorY.translateY = this.y;
+      }
       //this.angle = -50//Math.sqrt(Math.pow(vectorX.magnitude, 2) + Math.pow(vectorY.magnitude, 2));
       //console.log(this.angle)
     }

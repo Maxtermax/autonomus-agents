@@ -1147,10 +1147,27 @@ var SpaceShip = function () {
           //this.x = Math.round(vector.magnitude * Math.cos(vector.direction));
           //this.y = Math.round(vector.magnitude * Math.sin(vector.direction));           
           var masa = this.width * this.height;
-          this.accelerationX = Math.round(vectorX.magnitude * Math.cos(vectorX.direction)) / masa;
-          this.accelerationY = Math.round(vectorY.magnitude * Math.sin(vectorY.direction)) / masa;
-          this.x += this.accelerationX;
-          this.y += this.accelerationY;
+          if (vectorX) {
+            this.accelerationX = Math.round(vectorX.magnitude * Math.cos(vectorX.direction)) / masa;
+            this.x += this.accelerationX;
+            vectorX.translateX = this.x;
+            vectorX.translateY = this.y;
+          }
+
+          if (vectorY) {
+            this.accelerationY = Math.round(vectorY.magnitude * Math.sin(vectorY.direction)) / masa;
+            this.y += this.accelerationY;
+            /*
+            let reachPoint = (this.y > Math.round(vectorY.magnitude * Math.sin(vectorY.direction)))
+            if(!reachPoint) {
+              this.y += this.accelerationY;          
+            } else {
+              vectorY.display = false;
+            }
+            */
+            vectorY.translateX = this.x;
+            vectorY.translateY = this.y;
+          }
           //this.angle = -50//Math.sqrt(Math.pow(vectorX.magnitude, 2) + Math.pow(vectorY.magnitude, 2));
           //console.log(this.angle)
         }
@@ -1365,48 +1382,62 @@ var Universe = function () {
       }
     }
   }, {
+    key: 'generateVectorY',
+    value: function generateVectorY() {
+      var magnitude = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+      var id = arguments[1];
+
+      var mainMask = this.stage.find('mainMask');
+      var vectorY = new _Vector2.default({
+        ctx: ctx,
+        magnitude: magnitude,
+        direction: 90,
+        canvas: canvas,
+        id: id || (0, _index.guid)(),
+        color: 'red'
+      });
+      mainMask.push(vectorY);
+      return { y: vectorY };
+    }
+  }, {
+    key: 'generateVectorX',
+    value: function generateVectorX() {
+      var magnitude = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+      var id = arguments[1];
+
+      var mainMask = this.stage.find('mainMask');
+      var vectorX = new _Vector2.default({
+        ctx: ctx,
+        magnitude: magnitude,
+        direction: 0,
+        canvas: canvas,
+        id: id || (0, _index.guid)(),
+        color: 'blue'
+      });
+      mainMask.push(vectorX);
+      return { x: vectorX };
+    }
+  }, {
     key: 'preload',
     value: function preload() {
       var _this2 = this;
 
       this.stage = new _Stage2.default(canvas, true);
-      var vectorX = new _Vector2.default({
-        ctx: ctx,
-        x: 0,
-        y: 0,
-        magnitude: 1050,
-        direction: 0,
-        id: 'vectorX',
-        canvas: canvas,
-        color: 'yellow'
-      });
-
-      var vectorY = new _Vector2.default({
-        ctx: ctx,
-        x: 0,
-        y: 0,
-        magnitude: 850,
-        direction: 90,
-        id: 'vectorY',
-        canvas: canvas,
-        color: 'green'
-      });
-
-      var mainMask = this.stage.find('mainMask');
-      mainMask.push(vectorX);
-      mainMask.push(vectorY);
+      var newVectorY1 = this.generateVectorY(100, 'vectorX');
+      var newVectorX1 = this.generateVectorX(100, 'vectorY');
 
       var nav = new _SpaceShip2.default({
-        width: 15,
-        height: 15,
-        x: 0,
-        y: 0,
+        width: 20,
+        height: 20,
+        x: 10,
+        y: 10,
         ctx: ctx,
         color: 'white',
         id: 'nav',
         angle: 0 * Math.PI / 180,
-        vectors: [{ x: vectorX, y: vectorY }]
+        vectors: [newVectorY1, newVectorX1]
       });
+
       this.stage.find('mainMask').push(nav);
 
       //let onMove = this.moveEvent.bind(this);
@@ -2488,6 +2519,10 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 var Vector = function () {
   function Vector(_ref) {
     var ctx = _ref.ctx,
+        _ref$translateX = _ref.translateX,
+        translateX = _ref$translateX === undefined ? 0 : _ref$translateX,
+        _ref$translateY = _ref.translateY,
+        translateY = _ref$translateY === undefined ? 0 : _ref$translateY,
         _ref$size = _ref.size,
         size = _ref$size === undefined ? 5 : _ref$size,
         canvas = _ref.canvas,
@@ -2510,6 +2545,8 @@ var Vector = function () {
     this.direction = direction * Math.PI / 180;
     this.x = Math.round(magnitude * Math.cos(this.direction));
     this.y = Math.round(magnitude * Math.sin(this.direction));
+    this.translateX = translateX;
+    this.translateY = translateY;
     this.size = size;
     this.id = id;
     this.display = display;
@@ -2531,12 +2568,14 @@ var Vector = function () {
           y = this.y,
           size = this.size,
           magnitude = this.magnitude,
+          translateX = this.translateX,
+          translateY = this.translateY,
           direction = this.direction,
           color = this.color;
 
       ctx.save();
       ctx.scale(1, -1);
-      ctx.translate(x, y);
+      ctx.translate(x + translateX, y + translateY);
       ctx.rotate(direction);
 
       ctx.beginPath();
@@ -2559,18 +2598,21 @@ var Vector = function () {
           direction = this.direction,
           x = this.x,
           y = this.y,
+          translateX = this.translateX,
+          translateY = this.translateY,
           canvas = this.canvas,
           color = this.color;
 
       ctx.save();
-      ctx.translate(0, 0);
       ctx.scale(1, -1);
+      ctx.translate(translateX, translateY);
       ctx.beginPath();
 
       //ctx.fillStyle = color;
       //ctx.fillRect(0, 0, 10, 10);//ancla 
       ctx.lineTo(0, 0);
       ctx.lineTo(x, y);
+
       ctx.lineCap = "round";
       ctx.lineWidth = 2;
       ctx.strokeStyle = color;
