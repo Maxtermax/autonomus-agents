@@ -105,12 +105,12 @@ class Universe {
     }   
   }
   
-  generateVectorY(magnitude = 0, id) {
+  generateVectorY(magnitude = 0, direction, id) {
     const mainMask = this.stage.find('mainMask')
     let vectorY = new Vector({
       ctx, 
       magnitude, 
-      direction: 90,
+      direction,
       canvas,
       id: id || guid(),
       color: 'red'
@@ -119,12 +119,12 @@ class Universe {
     return {y: vectorY}
   }
 
-  generateVectorX(magnitude = 0, id) {
+  generateVectorX(magnitude = 0, direction, id) {
     const mainMask = this.stage.find('mainMask')
     let vectorX = new Vector({
       ctx, 
       magnitude, 
-      direction: 0,
+      direction,
       canvas,
       id: id || guid(),
       color: 'blue'
@@ -135,8 +135,8 @@ class Universe {
 
   preload() {
     this.stage = new Stage(canvas, true);  
-    let newVectorY1 = this.generateVectorY(100, 'vectorX');    
-    let newVectorX1 = this.generateVectorX(100, 'vectorY');    
+    let newVectorY1 = this.generateVectorY(970, 50, 'vectorY');    
+    let newVectorX1 = this.generateVectorX(200, 80, 'vectorX');    
 
     let nav = new SpaceShip({
       width: 20, 

@@ -1090,6 +1090,7 @@ var SpaceShip = function () {
     this.vectors = vectors;
     this.moveX = moveX;
     this.moveY = moveY;
+    this.an = 0;
     this.grid = new _Grid2.default({ ctx: ctx, x: 0, y: 0, width: 200, height: 200, padding: 10, color: 'red' });
     //this.info = new TextBox(ctx, x, y, 'deg: 0, x:0, y:0', '12px arial', true, id = 'info');
   }
@@ -1113,13 +1114,21 @@ var SpaceShip = function () {
       ctx.beginPath();
       ctx.translate(0, 0);
       ctx.scale(1, -1);
-      ctx.rotate(angle);
-      ctx.fillStyle = color;
-      ctx.fillRect(x + -(width / 2), y + -(height / 2), width, height);
-      //this.grid.render();
-      ctx.closePath(); //ship    
-      ctx.restore(); //restore angle
 
+      ctx.fillStyle = color;
+      ctx.strokeStyle = 'red';
+      ctx.translate(x, y);
+      var masa = this.width * this.height;
+      var cx = this.x * masa;
+      var cy = this.y * masa;
+      var deg = (0, _index.coordidatesToDeg)(cx, cy);
+      ctx.rotate(deg * Math.PI / 180);
+      ctx.fillStyle = 'green';
+      ctx.fillRect(-(width / 2), -(height / 2), width, height);
+      //this.grid.render();
+      ctx.closePath();
+      ctx.restore();
+      this.an -= 2;
       /*
       ctx.beginPath();
       ctx.strokeStyle = 'white';
@@ -1385,13 +1394,14 @@ var Universe = function () {
     key: 'generateVectorY',
     value: function generateVectorY() {
       var magnitude = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-      var id = arguments[1];
+      var direction = arguments[1];
+      var id = arguments[2];
 
       var mainMask = this.stage.find('mainMask');
       var vectorY = new _Vector2.default({
         ctx: ctx,
         magnitude: magnitude,
-        direction: 90,
+        direction: direction,
         canvas: canvas,
         id: id || (0, _index.guid)(),
         color: 'red'
@@ -1403,13 +1413,14 @@ var Universe = function () {
     key: 'generateVectorX',
     value: function generateVectorX() {
       var magnitude = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-      var id = arguments[1];
+      var direction = arguments[1];
+      var id = arguments[2];
 
       var mainMask = this.stage.find('mainMask');
       var vectorX = new _Vector2.default({
         ctx: ctx,
         magnitude: magnitude,
-        direction: 0,
+        direction: direction,
         canvas: canvas,
         id: id || (0, _index.guid)(),
         color: 'blue'
@@ -1423,8 +1434,8 @@ var Universe = function () {
       var _this2 = this;
 
       this.stage = new _Stage2.default(canvas, true);
-      var newVectorY1 = this.generateVectorY(100, 'vectorX');
-      var newVectorX1 = this.generateVectorX(100, 'vectorY');
+      var newVectorY1 = this.generateVectorY(970, 50, 'vectorY');
+      var newVectorX1 = this.generateVectorX(200, 80, 'vectorX');
 
       var nav = new _SpaceShip2.default({
         width: 20,

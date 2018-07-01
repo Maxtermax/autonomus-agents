@@ -1,7 +1,7 @@
 import TextBox from './components/TextBox.js';
 import Explotion from './Explotion.js';
 import Grid from './components/Grid.js';
-import { isOverLapping, guid } from './utils/index.js';
+import { isOverLapping, guid, coordidatesToDeg } from './utils/index.js';
 const Shoot = document.getElementById('shoot');
 let now = Date.now();
 
@@ -25,6 +25,7 @@ export default class SpaceShip {
     this.vectors = vectors;
     this.moveX = moveX;
     this.moveY = moveY;
+    this.an = 0;
     this.grid = new Grid({ctx,x:0,y:0,width: 200, height: 200, padding: 10, color: 'red'})
     //this.info = new TextBox(ctx, x, y, 'deg: 0, x:0, y:0', '12px arial', true, id = 'info');
   }
@@ -35,13 +36,21 @@ export default class SpaceShip {
     ctx.beginPath();
     ctx.translate(0, 0);
     ctx.scale(1, -1);  
-    ctx.rotate(angle);
-    ctx.fillStyle = color;
-    ctx.fillRect(x+(-(width/2)), y+(-(height/2)), width, height);
-    //this.grid.render();
-    ctx.closePath();//ship    
-    ctx.restore();//restore angle
 
+    ctx.fillStyle = color;   
+    ctx.strokeStyle = 'red';    
+    ctx.translate(x, y);
+    let masa = this.width * this.height;
+    let cx = this.x * masa;   
+    let cy = this.y * masa;   
+    let deg = coordidatesToDeg(cx, cy);
+    ctx.rotate(deg*Math.PI/180);
+    ctx.fillStyle = 'green';
+    ctx.fillRect(-(width/2), -(height/2), width, height);
+    //this.grid.render();
+    ctx.closePath();
+    ctx.restore();  
+    this.an -= 2;
     /*
     ctx.beginPath();
     ctx.strokeStyle = 'white';
