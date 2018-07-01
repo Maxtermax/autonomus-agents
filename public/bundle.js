@@ -1434,8 +1434,8 @@ var Universe = function () {
       var _this2 = this;
 
       this.stage = new _Stage2.default(canvas, true);
-      var newVectorY1 = this.generateVectorY(970, 50, 'vectorY');
-      var newVectorX1 = this.generateVectorX(200, 80, 'vectorX');
+      var newVectorY1 = this.generateVectorY(200, 90, 'vectorY');
+      var newVectorX1 = this.generateVectorX(150, 0, 'vectorX');
 
       var nav = new _SpaceShip2.default({
         width: 20,

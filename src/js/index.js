@@ -135,8 +135,8 @@ class Universe {
 
   preload() {
     this.stage = new Stage(canvas, true);  
-    let newVectorY1 = this.generateVectorY(970, 50, 'vectorY');    
-    let newVectorX1 = this.generateVectorX(200, 80, 'vectorX');    
+    let newVectorY1 = this.generateVectorY(200, 90, 'vectorY');    
+    let newVectorX1 = this.generateVectorX(150, 0, 'vectorX');    
 
     let nav = new SpaceShip({
       width: 20, 
@@ -160,8 +160,8 @@ class Universe {
       let deg = coordidatesToDeg(calc.x, calc.y);
       let vectorX = this.stage.find('mainMask').find('vectorX');
       let vectorY = this.stage.find('mainMask').find('vectorY');
-      vectorX.direction = deg * Math.PI / 180;
-      vectorY.direction = deg * Math.PI / 180;      
+      vectorX.direction = (deg * Math.PI / 180);
+      vectorY.direction = (deg * Math.PI / 180);      
       viewport.data = `deg: ${Math.floor(deg)}, x: ${calc.x}, y: ${calc.y}`;      
 
       /*
