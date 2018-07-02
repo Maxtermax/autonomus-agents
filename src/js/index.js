@@ -135,19 +135,22 @@ class Universe {
 
   preload() {
     this.stage = new Stage(canvas, true);  
-    let newVectorY1 = this.generateVectorY(200, 90, 'vectorY');    
-    let newVectorX1 = this.generateVectorX(150, 0, 'vectorX');    
+    let newVectorY1 = this.generateVectorY(50, 90, 'vectorY');     
+    let newVectorY2 = this.generateVectorY(50, 270, 'vectorY2');     
+
+    let newVectorX1 = this.generateVectorX(50, 0, 'vectorX');  
+    let newVectorX2 = this.generateVectorX(50, 180, 'vectorX2');  
 
     let nav = new SpaceShip({
-      width: 20, 
-      height: 20, 
+      width: 15, 
+      height: 15, 
       x: 10, 
       y: 10,  
       ctx, 
-      color: 'white', 
+      color: 'yellow', 
       id: 'nav',
       angle: 0 * Math.PI /180,
-      vectors: [newVectorY1, newVectorX1]
+      vectors: [newVectorY1, newVectorY2, newVectorX1, newVectorX2]
     })    
 
     this.stage.find('mainMask').push(nav);    

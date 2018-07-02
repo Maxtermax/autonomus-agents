@@ -25,41 +25,40 @@ export default class SpaceShip {
     this.vectors = vectors;
     this.moveX = moveX;
     this.moveY = moveY;
-    this.an = 0;
+    this.orbit = 1;
     this.grid = new Grid({ctx,x:0,y:0,width: 200, height: 200, padding: 10, color: 'red'})
     //this.info = new TextBox(ctx, x, y, 'deg: 0, x:0, y:0', '12px arial', true, id = 'info');
   }
 
   drawShip() {
-    let { angle, width, height, x, y, ctx, color, viewRange = 80, viewAmplitude = 50 } = this;
-    ctx.save();//save angle
-    ctx.beginPath();
-    ctx.translate(0, 0);
-    ctx.scale(1, -1);  
-
-    ctx.fillStyle = color;   
-    ctx.strokeStyle = 'red';    
-    ctx.translate(x, y);
-    let masa = this.width * this.height;
+    let { angle, width, height, x, y, orbit, ctx, color, viewRange = 80, viewAmplitude = 50 } = this;
+    let masa = (this.width * this.height);
     let cx = this.x * masa;   
     let cy = this.y * masa;   
     let deg = coordidatesToDeg(cx, cy);
-    ctx.rotate(deg*Math.PI/180);
-    ctx.fillStyle = 'green';
-    ctx.fillRect(-(width/2), -(height/2), width, height);
-    //this.grid.render();
+
+    ctx.save();//save angle
+    ctx.beginPath();
+    ctx.scale(1, -1);  
+    ctx.fillStyle = color;   
+    ctx.strokeStyle = color; 
+    ctx.translate(x, y);
+    ctx.rotate((Math.floor(deg)) * Math.PI/180);
+    ctx.lineWidth = 2;
+    ctx.lineTo(-(width/2), height/2);
+    ctx.lineTo(width/2, -(height/2)+height/2);
+    ctx.lineTo(-(width/2)+2, -height/2);
+    ctx.lineTo(-(width/2)+5, (height/2)/height);
+    ctx.lineTo(-(width/2)+1, (height/2));
+    //ctx.fillStyle = `rgba(255, 255, 255, ${ Math.cos(orbit)*0.8 })`;  
+    ctx.stroke();
+    ctx.closePath();
+        
+    ctx.beginPath();  
+    ctx.arc(-(width/2)+(width/2), -(height/2)+(height/2), width+height, 0, 360*Math.PI/180);
+    ctx.stroke();
     ctx.closePath();
     ctx.restore();  
-    this.an -= 2;
-    /*
-    ctx.beginPath();
-    ctx.strokeStyle = 'white';
-    ctx.lineWidth = 1;
-    ctx.arc(x, -y, width * 1.5, 0, 2 * Math.PI);
-    ctx.stroke();    
-    ctx.closePath();//arc bound 
-    ctx.restore();//restore angle
-    */
   }
 
   update() {
@@ -69,7 +68,7 @@ export default class SpaceShip {
       let vectorY = vector.y;      
       //this.x = Math.round(vector.magnitude * Math.cos(vector.direction));
       //this.y = Math.round(vector.magnitude * Math.sin(vector.direction));           
-      let masa = this.width * this.height;
+      let masa = (this.width * this.height);
       if(vectorX) {
         this.accelerationX = Math.round(vectorX.magnitude * Math.cos(vectorX.direction)) / masa;   
         this.x += this.accelerationX;
@@ -95,7 +94,8 @@ export default class SpaceShip {
       //console.log(this.angle)
     }
     //this.angle += 0.5;
-       
+    //this.orbit += 0.1;          
+
     if (this.bound) {
       if (this.prevX < this.x) this.x += this.momentum / 100;
       if (this.prevX > this.x) this.x -= this.momentum / 100;

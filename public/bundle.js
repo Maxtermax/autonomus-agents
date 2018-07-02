@@ -1090,7 +1090,7 @@ var SpaceShip = function () {
     this.vectors = vectors;
     this.moveX = moveX;
     this.moveY = moveY;
-    this.an = 0;
+    this.orbit = 1;
     this.grid = new _Grid2.default({ ctx: ctx, x: 0, y: 0, width: 200, height: 200, padding: 10, color: 'red' });
     //this.info = new TextBox(ctx, x, y, 'deg: 0, x:0, y:0', '12px arial', true, id = 'info');
   }
@@ -1103,6 +1103,7 @@ var SpaceShip = function () {
           height = this.height,
           x = this.x,
           y = this.y,
+          orbit = this.orbit,
           ctx = this.ctx,
           color = this.color,
           _viewRange = this.viewRange,
@@ -1110,34 +1111,33 @@ var SpaceShip = function () {
           _viewAmplitude = this.viewAmplitude,
           viewAmplitude = _viewAmplitude === undefined ? 50 : _viewAmplitude;
 
-      ctx.save(); //save angle
-      ctx.beginPath();
-      ctx.translate(0, 0);
-      ctx.scale(1, -1);
-
-      ctx.fillStyle = color;
-      ctx.strokeStyle = 'red';
-      ctx.translate(x, y);
       var masa = this.width * this.height;
       var cx = this.x * masa;
       var cy = this.y * masa;
       var deg = (0, _index.coordidatesToDeg)(cx, cy);
-      ctx.rotate(deg * Math.PI / 180);
-      ctx.fillStyle = 'green';
-      ctx.fillRect(-(width / 2), -(height / 2), width, height);
-      //this.grid.render();
+
+      ctx.save(); //save angle
+      ctx.beginPath();
+      ctx.scale(1, -1);
+      ctx.fillStyle = color;
+      ctx.strokeStyle = color;
+      ctx.translate(x, y);
+      ctx.rotate(Math.floor(deg) * Math.PI / 180);
+      ctx.lineWidth = 2;
+      ctx.lineTo(-(width / 2), height / 2);
+      ctx.lineTo(width / 2, -(height / 2) + height / 2);
+      ctx.lineTo(-(width / 2) + 2, -height / 2);
+      ctx.lineTo(-(width / 2) + 5, height / 2 / height);
+      ctx.lineTo(-(width / 2) + 1, height / 2);
+      //ctx.fillStyle = `rgba(255, 255, 255, ${ Math.cos(orbit)*0.8 })`;  
+      ctx.stroke();
+      ctx.closePath();
+
+      ctx.beginPath();
+      ctx.arc(-(width / 2) + width / 2, -(height / 2) + height / 2, width + height, 0, 360 * Math.PI / 180);
+      ctx.stroke();
       ctx.closePath();
       ctx.restore();
-      this.an -= 2;
-      /*
-      ctx.beginPath();
-      ctx.strokeStyle = 'white';
-      ctx.lineWidth = 1;
-      ctx.arc(x, -y, width * 1.5, 0, 2 * Math.PI);
-      ctx.stroke();    
-      ctx.closePath();//arc bound 
-      ctx.restore();//restore angle
-      */
     }
   }, {
     key: 'update',
@@ -1181,6 +1181,7 @@ var SpaceShip = function () {
           //console.log(this.angle)
         }
         //this.angle += 0.5;
+        //this.orbit += 0.1;          
       } catch (err) {
         _didIteratorError = true;
         _iteratorError = err;
@@ -1434,19 +1435,22 @@ var Universe = function () {
       var _this2 = this;
 
       this.stage = new _Stage2.default(canvas, true);
-      var newVectorY1 = this.generateVectorY(200, 90, 'vectorY');
-      var newVectorX1 = this.generateVectorX(150, 0, 'vectorX');
+      var newVectorY1 = this.generateVectorY(50, 90, 'vectorY');
+      var newVectorY2 = this.generateVectorY(50, 270, 'vectorY2');
+
+      var newVectorX1 = this.generateVectorX(50, 0, 'vectorX');
+      var newVectorX2 = this.generateVectorX(50, 180, 'vectorX2');
 
       var nav = new _SpaceShip2.default({
-        width: 20,
-        height: 20,
+        width: 15,
+        height: 15,
         x: 10,
         y: 10,
         ctx: ctx,
-        color: 'white',
+        color: 'yellow',
         id: 'nav',
         angle: 0 * Math.PI / 180,
-        vectors: [newVectorY1, newVectorX1]
+        vectors: [newVectorY1, newVectorY2, newVectorX1, newVectorX2]
       });
 
       this.stage.find('mainMask').push(nav);
