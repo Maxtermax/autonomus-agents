@@ -1038,17 +1038,20 @@ var _Grid = __webpack_require__(109);
 
 var _Grid2 = _interopRequireDefault(_Grid);
 
+var _Vector = __webpack_require__(93);
+
+var _Vector2 = _interopRequireDefault(_Vector);
+
 var _index = __webpack_require__(14);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var Shoot = document.getElementById('shoot');
-var now = Date.now();
 
 var SpaceShip = function () {
   function SpaceShip(_ref) {
     var ctx = _ref.ctx,
         width = _ref.width,
+        canvas = _ref.canvas,
+        mass = _ref.mass,
         height = _ref.height,
         _ref$vectors = _ref.vectors,
         vectors = _ref$vectors === undefined ? [] : _ref$vectors,
@@ -1056,14 +1059,10 @@ var SpaceShip = function () {
         y = _ref.y,
         _ref$angle = _ref.angle,
         angle = _ref$angle === undefined ? 0 : _ref$angle,
-        _ref$moveX = _ref.moveX,
-        moveX = _ref$moveX === undefined ? 0 : _ref$moveX,
-        _ref$moveY = _ref.moveY,
-        moveY = _ref$moveY === undefined ? 0 : _ref$moveY,
-        _ref$accelerationX = _ref.accelerationX,
-        accelerationX = _ref$accelerationX === undefined ? 0 : _ref$accelerationX,
-        _ref$accelerationY = _ref.accelerationY,
-        accelerationY = _ref$accelerationY === undefined ? 0 : _ref$accelerationY,
+        _ref$velocity = _ref.velocity,
+        velocity = _ref$velocity === undefined ? 1 : _ref$velocity,
+        _ref$acceleration = _ref.acceleration,
+        acceleration = _ref$acceleration === undefined ? 0 : _ref$acceleration,
         _ref$color = _ref.color,
         color = _ref$color === undefined ? 'white' : _ref$color,
         _ref$id = _ref.id,
@@ -1074,23 +1073,32 @@ var SpaceShip = function () {
 
     this.width = width;
     this.height = height;
-    this.prevX = x;
-    this.prevY = y;
     this.x = x - width / 2;
     this.y = y - height / 2;
     this.ctx = ctx;
     this.color = color;
     this.id = id;
-    this.bound = false;
-    this.momentum = 100;
     this.angle = angle;
     this.display = display;
-    this.accelerationX = accelerationX;
-    this.accelerationY = accelerationY;
+    this.acceleration = new _Vector2.default({
+      ctx: ctx,
+      magnitude: 0,
+      direction: 0,
+      canvas: canvas,
+      id: 'acceleration',
+      color: 'red'
+    });
+    this.velocity = new _Vector2.default({
+      ctx: ctx,
+      magnitude: 0,
+      direction: 0,
+      canvas: canvas,
+      id: 'velocity',
+      color: 'blue'
+    });
     this.vectors = vectors;
-    this.moveX = moveX;
-    this.moveY = moveY;
-    this.orbit = 1;
+    this.mass = mass;
+    this.canvas = canvas;
     this.grid = new _Grid2.default({ ctx: ctx, x: 0, y: 0, width: 200, height: 200, padding: 10, color: 'red' });
     //this.info = new TextBox(ctx, x, y, 'deg: 0, x:0, y:0', '12px arial', true, id = 'info');
   }
@@ -1099,22 +1107,15 @@ var SpaceShip = function () {
     key: 'drawShip',
     value: function drawShip() {
       var angle = this.angle,
+          mass = this.mass,
           width = this.width,
           height = this.height,
           x = this.x,
           y = this.y,
-          orbit = this.orbit,
           ctx = this.ctx,
           color = this.color,
-          _viewRange = this.viewRange,
-          viewRange = _viewRange === undefined ? 80 : _viewRange,
-          _viewAmplitude = this.viewAmplitude,
-          viewAmplitude = _viewAmplitude === undefined ? 50 : _viewAmplitude;
-
-      var masa = this.width * this.height;
-      var cx = this.x * masa;
-      var cy = this.y * masa;
-      var deg = (0, _index.coordidatesToDeg)(cx, cy);
+          acceleration = this.acceleration,
+          velocity = this.velocity;
 
       ctx.save(); //save angle
       ctx.beginPath();
@@ -1122,7 +1123,7 @@ var SpaceShip = function () {
       ctx.fillStyle = color;
       ctx.strokeStyle = color;
       ctx.translate(x, y);
-      ctx.rotate(Math.floor(deg) * Math.PI / 180);
+      ctx.rotate(angle);
       ctx.lineWidth = 2;
       ctx.lineTo(-(width / 2), height / 2);
       ctx.lineTo(width / 2, -(height / 2) + height / 2);
@@ -1138,11 +1139,17 @@ var SpaceShip = function () {
       ctx.stroke();
       ctx.closePath();
       ctx.restore();
+      acceleration.render();
+      velocity.render();
     }
   }, {
-    key: 'update',
-    value: function update() {
-      var vectors = this.vectors;
+    key: 'moveSpaceShip',
+    value: function moveSpaceShip() {
+      var vectors = this.vectors,
+          mass = this.mass,
+          acceleration = this.acceleration,
+          velocity = this.velocity,
+          canvas = this.canvas;
       var _iteratorNormalCompletion = true;
       var _didIteratorError = false;
       var _iteratorError = undefined;
@@ -1150,38 +1157,33 @@ var SpaceShip = function () {
       try {
         for (var _iterator = (0, _getIterator3.default)(vectors), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
           var vector = _step.value;
+          var x = vector.x,
+              y = vector.y,
+              magnitude = vector.magnitude,
+              direction = vector.direction;
 
-          var vectorX = vector.x;
-          var vectorY = vector.y;
-          //this.x = Math.round(vector.magnitude * Math.cos(vector.direction));
-          //this.y = Math.round(vector.magnitude * Math.sin(vector.direction));           
-          var masa = this.width * this.height;
-          if (vectorX) {
-            this.accelerationX = Math.round(vectorX.magnitude * Math.cos(vectorX.direction)) / masa;
-            this.x += this.accelerationX;
-            vectorX.translateX = this.x;
-            vectorX.translateY = this.y;
-          }
-
-          if (vectorY) {
-            this.accelerationY = Math.round(vectorY.magnitude * Math.sin(vectorY.direction)) / masa;
-            this.y += this.accelerationY;
-            /*
-            let reachPoint = (this.y > Math.round(vectorY.magnitude * Math.sin(vectorY.direction)))
-            if(!reachPoint) {
-              this.y += this.accelerationY;          
-            } else {
-              vectorY.display = false;
-            }
-            */
-            vectorY.translateX = this.x;
-            vectorY.translateY = this.y;
-          }
-          //this.angle = -50//Math.sqrt(Math.pow(vectorX.magnitude, 2) + Math.pow(vectorY.magnitude, 2));
-          //console.log(this.angle)
+          this.angle = direction;
+          var deg = direction / (Math.PI / 180);
+          var right = deg <= 90 && deg >= 0 || deg <= 0 && deg >= -90;
+          var left = deg >= 90 && deg <= 180 || deg >= -180 && deg <= -90;
+          var up = deg > 0;
+          var down = deg < 0;
+          //if(left) console.log('left ');
+          //if(right) console.log('right')
+          //if(up) console.log('up')
+          //if(down) console.log('down')
+          /*
+           this.acceleration = magnitude/mass;   
+          if(right) this.velocityX += this.acceleration;
+          if(left) this.velocityX -= this.acceleration;
+          if(up) this.velocityY += magnitude/mass;
+          if(down) this.velocityY -= magnitude/mass;
+          this.x = this.velocityX;
+          this.y = this.velocityY;
+          vector.translateX = this.x;
+          vector.translateY = this.y;
+          */
         }
-        //this.angle += 0.5;
-        //this.orbit += 0.1;          
       } catch (err) {
         _didIteratorError = true;
         _iteratorError = err;
@@ -1196,21 +1198,31 @@ var SpaceShip = function () {
           }
         }
       }
+    }
+  }, {
+    key: 'update',
+    value: function update() {
+      this.moveSpaceShip();
 
-      if (this.bound) {
-        if (this.prevX < this.x) this.x += this.momentum / 100;
-        if (this.prevX > this.x) this.x -= this.momentum / 100;
-        if (this.prevY < this.y) this.y += this.momentum / 100;
-        if (this.prevY > this.y) this.y -= this.momentum / 100;
-        this.momentum -= 1;
+      /* 
+      for(let vector of vectors) {      
+        let vectorX = vector.x;      
+        let vectorY = vector.y;      
+        //this.x = Math.round(vector.magnitude * Math.cos(vector.direction));
+        //this.y = Math.round(vector.magnitude * Math.sin(vector.direction));           
+          this.accelerationX = Math.round(vectorX.magnitude * Math.cos(vectorX.direction)) / mass;   
+          this.x += this.accelerationX;
+          vectorX.translateX = this.x;
+          vectorX.translateY = this.y;
+           this.accelerationY = Math.round(vectorY.magnitude * Math.sin(vectorY.direction)) / mass;                 
+          this.y += this.accelerationY;          
+           vectorY.translateX = this.x;
+          vectorY.translateY = this.y;
+        
+        //this.angle = -50//Math.sqrt(Math.pow(vectorX.magnitude, 2) + Math.pow(vectorY.magnitude, 2));
+        //console.log(this.angle)
       }
-      if (this.momentum <= 0) {
-        this.bound = false;
-        this.momentum = 100;
-        //this.angle = 0;
-        this.prevX = this.x;
-        this.prevY = this.y;
-      }
+      */
     }
   }, {
     key: 'render',
@@ -1392,14 +1404,14 @@ var Universe = function () {
       }
     }
   }, {
-    key: 'generateVectorY',
-    value: function generateVectorY() {
+    key: 'generateVector',
+    value: function generateVector() {
       var magnitude = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
       var direction = arguments[1];
       var id = arguments[2];
 
       var mainMask = this.stage.find('mainMask');
-      var vectorY = new _Vector2.default({
+      var vector = new _Vector2.default({
         ctx: ctx,
         magnitude: magnitude,
         direction: direction,
@@ -1407,27 +1419,8 @@ var Universe = function () {
         id: id || (0, _index.guid)(),
         color: 'red'
       });
-      mainMask.push(vectorY);
-      return { y: vectorY };
-    }
-  }, {
-    key: 'generateVectorX',
-    value: function generateVectorX() {
-      var magnitude = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-      var direction = arguments[1];
-      var id = arguments[2];
-
-      var mainMask = this.stage.find('mainMask');
-      var vectorX = new _Vector2.default({
-        ctx: ctx,
-        magnitude: magnitude,
-        direction: direction,
-        canvas: canvas,
-        id: id || (0, _index.guid)(),
-        color: 'blue'
-      });
-      mainMask.push(vectorX);
-      return { x: vectorX };
+      mainMask.push(vector);
+      return vector;
     }
   }, {
     key: 'preload',
@@ -1435,22 +1428,20 @@ var Universe = function () {
       var _this2 = this;
 
       this.stage = new _Stage2.default(canvas, true);
-      var newVectorY1 = this.generateVectorY(50, 90, 'vectorY');
-      var newVectorY2 = this.generateVectorY(50, 270, 'vectorY2');
-
-      var newVectorX1 = this.generateVectorX(50, 0, 'vectorX');
-      var newVectorX2 = this.generateVectorX(50, 180, 'vectorX2');
+      var rope = this.generateVector(100, 0, 'rope');
 
       var nav = new _SpaceShip2.default({
+        canvas: canvas,
         width: 15,
         height: 15,
+        mass: 50,
         x: 10,
         y: 10,
         ctx: ctx,
         color: 'yellow',
         id: 'nav',
         angle: 0 * Math.PI / 180,
-        vectors: [newVectorY1, newVectorY2, newVectorX1, newVectorX2]
+        vectors: [rope]
       });
 
       this.stage.find('mainMask').push(nav);
@@ -1461,10 +1452,10 @@ var Universe = function () {
         var mousePos = (0, _index.getMousePos)(canvas, e);
         var calc = (0, _index.calcCartesiano)(mousePos.x, mousePos.y, canvas);
         var deg = (0, _index.coordidatesToDeg)(calc.x, calc.y);
-        var vectorX = _this2.stage.find('mainMask').find('vectorX');
-        var vectorY = _this2.stage.find('mainMask').find('vectorY');
-        vectorX.direction = deg * Math.PI / 180;
-        vectorY.direction = deg * Math.PI / 180;
+        var rope = _this2.stage.find('mainMask').find('rope');
+        rope.direction = deg * Math.PI / 180;
+        rope.magnitude = Math.sqrt(Math.pow(calc.x, 2) + Math.pow(calc.y, 2));
+
         viewport.data = 'deg: ' + Math.floor(deg) + ', x: ' + calc.x + ', y: ' + calc.y;
 
         /*

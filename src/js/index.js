@@ -105,9 +105,9 @@ class Universe {
     }   
   }
   
-  generateVectorY(magnitude = 0, direction, id) {
-    const mainMask = this.stage.find('mainMask')
-    let vectorY = new Vector({
+  generateVector(magnitude = 0, direction, id) {
+    const mainMask = this.stage.find('mainMask');
+    let vector = new Vector({
       ctx, 
       magnitude, 
       direction,
@@ -115,42 +115,26 @@ class Universe {
       id: id || guid(),
       color: 'red'
     })           
-    mainMask.push(vectorY);   
-    return {y: vectorY}
-  }
-
-  generateVectorX(magnitude = 0, direction, id) {
-    const mainMask = this.stage.find('mainMask')
-    let vectorX = new Vector({
-      ctx, 
-      magnitude, 
-      direction,
-      canvas,
-      id: id || guid(),
-      color: 'blue'
-    })           
-    mainMask.push(vectorX);   
-    return {x: vectorX}
+    mainMask.push(vector);   
+    return vector;
   }
 
   preload() {
     this.stage = new Stage(canvas, true);  
-    let newVectorY1 = this.generateVectorY(50, 90, 'vectorY');     
-    let newVectorY2 = this.generateVectorY(50, 270, 'vectorY2');     
-
-    let newVectorX1 = this.generateVectorX(50, 0, 'vectorX');  
-    let newVectorX2 = this.generateVectorX(50, 180, 'vectorX2');  
+    let rope = this.generateVector(100, 0, 'rope');     
 
     let nav = new SpaceShip({
+      canvas,
       width: 15, 
       height: 15, 
+      mass: 50,
       x: 10, 
       y: 10,  
       ctx, 
       color: 'yellow', 
       id: 'nav',
       angle: 0 * Math.PI /180,
-      vectors: [newVectorY1, newVectorY2, newVectorX1, newVectorX2]
+      vectors: [rope]
     })    
 
     this.stage.find('mainMask').push(nav);    
@@ -161,10 +145,10 @@ class Universe {
       let mousePos = getMousePos(canvas, e);
       let  calc = calcCartesiano(mousePos.x, mousePos.y, canvas);
       let deg = coordidatesToDeg(calc.x, calc.y);
-      let vectorX = this.stage.find('mainMask').find('vectorX');
-      let vectorY = this.stage.find('mainMask').find('vectorY');
-      vectorX.direction = (deg * Math.PI / 180);
-      vectorY.direction = (deg * Math.PI / 180);      
+      let rope = this.stage.find('mainMask').find('rope');
+      rope.direction = (deg * Math.PI / 180);      
+      rope.magnitude = Math.sqrt(Math.pow(calc.x, 2) + Math.pow(calc.y, 2));
+
       viewport.data = `deg: ${Math.floor(deg)}, x: ${calc.x}, y: ${calc.y}`;      
 
       /*
