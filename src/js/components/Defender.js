@@ -1,4 +1,4 @@
-import TextBox from './components/TextBox.js';
+import TextBox from './TextBox.js';
 import SpaceShip from './SpaceShip.js';
 
 export default class Defender extends SpaceShip {

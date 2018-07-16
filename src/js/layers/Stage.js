@@ -1,7 +1,7 @@
-import { calcCenter, getRandomInt } from './utils/index.js';
-import TextBox from './components/TextBox.js';
-import Viewport from './components/Viewport.js';
-
+import { calcCenter, getRandomInt } from '../utils/index.js';
+import TextBox from '../components/TextBox.js';
+import Viewport from '../components/Viewport.js';
+import Background from './Background.js';
 const scale = 0.8;
 
 export default class Stage {
@@ -15,6 +15,13 @@ export default class Stage {
     this.x = 0;
     this.y = 0;
     this.layers = [      
+      new Background({
+        canvas,
+        ctx, 
+        width, 
+        height,
+        id: 'universeBackground'
+      }),
       new Viewport({
         x: -canvas.width/2,
         y: -canvas.height/2,

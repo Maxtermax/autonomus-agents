@@ -1,4 +1,4 @@
-import { calcCenter, isCollide, touchEvents } from './utils/index.js';
+import { calcCenter, isCollide, touchEvents } from '../utils/index.js';
 
 export default class Controls {
   constructor({stage, canvas, onMove}, debug = false) {

@@ -1,3 +1,5 @@
+import { guid } from '../utils/index.js';
+
 export default class TextBox {
   constructor({ctx, x, y,  id = guid(), data = '', font = '12px arial', display = true}) {
     this.ctx = ctx;

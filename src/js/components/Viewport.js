@@ -22,7 +22,8 @@ export default class Viewport {
         y: 50, 
         data: 'deg: 0, x: 0, y: 0', 
         font: '12px arial', 
-        id: 'info'
+        id: 'info',
+        display: false
       })
     )
   }
@@ -40,10 +41,10 @@ export default class Viewport {
     if(!display) return;  
     ctx.save();
     ctx.beginPath();
-    ctx.strokeStyle = 'red';
+    ctx.strokeStyle = 'white';
     ctx.strokeRect(x+center.x, y+center.y, width, height);
     ctx.rect(x+center.x, y+center.y, width, height);
-    //ctx.clip();
+    ctx.clip();
     for(let layer of layers) {
       if(layer.display) layer.render();
     }

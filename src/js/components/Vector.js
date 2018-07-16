@@ -43,8 +43,38 @@ export default class Vector {
     ctx.restore();
   }
 
+  normalize() {
+    let { magnitude, x, y } = this;
+    if (magnitude != 0) {
+      this.x = x / magnitude;
+      this.y = y / magnitude;
+    }
+  }
+
+  mult(n) {
+    this.x = this.x * n;
+    this.y = this.y * n;        
+  }
+
+  sub(vector) {
+    this.x = this.x - vector.x;
+    this.y = this.y - vector.y;    
+  }
+
+  add(vector) {
+    this.x += vector.x;
+    this.y += vector.y;
+    //this.magnitude = Math.sqrt(Math.pow(this.x, 2), Math.pow(this.y, 2));    
+    //this.direction = Math.atan2(this.y, this.x);
+  }
+
+  div(vector) {
+    this.x = this.x / vector.x;
+    this.y = this.y / vector.y;    
+  }
+
   drawTail() {
-    let { ctx, magnitude, direction, x, y, translateX, translateY, canvas, color } = this;
+    let { ctx, magnitude, direction, x, y, translateX, translateY, canvas, color, id } = this;   
     ctx.save();    
     ctx.scale(1, -1);    
     ctx.translate(translateX, translateY);
@@ -53,7 +83,7 @@ export default class Vector {
     //ctx.fillStyle = color;
     //ctx.fillRect(0, 0, 10, 10);//ancla 
     ctx.lineTo(0, 0);
-    ctx.lineTo(x , y);
+    ctx.lineTo(x, y);
     
     ctx.lineCap="round";
     ctx.lineWidth = 2;
@@ -64,15 +94,17 @@ export default class Vector {
   }
 
   update() {
-    let { magnitude, direction } = this;
-    this.x = Math.round(magnitude * Math.cos(direction));
-    this.y = Math.round(magnitude * Math.sin(direction));    
+    //let { magnitude, direction } = this;
+    //this.x = Math.round(magnitude * Math.cos(direction));
+    //this.y = Math.round(magnitude * Math.sin(direction));    
   }
 
   render() {
-    let { ctx } = this;
+    let { ctx, display } = this;
     this.update();
-    this.drawTail();
-    this.drawHead();
+    if(display) {
+      this.drawTail();
+      this.drawHead();      
+    }
   }
 }
