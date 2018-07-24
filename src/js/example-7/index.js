@@ -68,12 +68,14 @@ class Universe extends Timelaps {
     let smaller;
     targets.forEach((target, index) => {
       target.debug = debug;
+      target.color = 'red';
       if (target.size > s) {
         s = target.size;
         smaller = index;
       }
     });
     if (targets.length) {
+      targets[smaller].color = 'blue';
       let steer = spaceship.calculateSteering(targets[smaller].id, (steer, desired) => {
         spaceship.forces[0] = steer;
         spaceship.forces[1] = desired;

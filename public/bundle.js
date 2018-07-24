@@ -6603,12 +6603,14 @@ var Universe = function (_Timelaps) {
       var smaller = void 0;
       targets.forEach(function (target, index) {
         target.debug = debug;
+        target.color = 'red';
         if (target.size > s) {
           s = target.size;
           smaller = index;
         }
       });
       if (targets.length) {
+        targets[smaller].color = 'blue';
         var steer = spaceship.calculateSteering(targets[smaller].id, function (steer, desired) {
           spaceship.forces[0] = steer;
           spaceship.forces[1] = desired;
