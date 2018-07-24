@@ -25,34 +25,30 @@ class Universe extends Timelaps {
 
     this.bottom_ctrl.onchange = e => {
       let force = this.spaceship.forces[3];
-      force.magnitude = Number(e.target.value);
-      force.x = Math.round(force.magnitude * Math.cos(force.direction));
-      force.y = Math.round(force.magnitude * Math.sin(force.direction));
-      show_bottom.innerHTML = `Bottom force: ${e.target.value}`;
+      let { value } = e.target;
+      force.set(value);
+      show_bottom.innerHTML = `Bottom force: ${Math.floor(value)}`;
     }
 
     this.top_ctrl.onchange = e => {
       let force = this.spaceship.forces[2];
-      force.magnitude = Number(e.target.value);
-      force.x = Math.round(force.magnitude * Math.cos(force.direction));
-      force.y = Math.round(force.magnitude * Math.sin(force.direction));
-      show_top.innerHTML = `Top force: ${e.target.value}`;      
+      let { value } = e.target;
+      force.set(value);
+      show_top.innerHTML = `Top force: ${Math.floor(value)}`;
     }
 
     this.right_ctrl.onchange = e => {
       let force = this.spaceship.forces[0];
-      force.magnitude = Number(e.target.value);
-      force.x = Math.round(force.magnitude * Math.cos(force.direction));
-      force.y = Math.round(force.magnitude * Math.sin(force.direction));    
-      show_right.innerHTML = `Right force: ${e.target.value}`;
+      let { value } = e.target;
+      force.set(value);
+      show_right.innerHTML = `Right force: ${Math.floor(value)}`;
     }
 
     this.left_ctrl.onchange = e => {
       let force = this.spaceship.forces[1];
-      force.magnitude = Number(e.target.value);
-      force.x = Math.round(force.magnitude * Math.cos(force.direction));
-      force.y = Math.round(force.magnitude * Math.sin(force.direction));   
-      show_left.innerHTML = `Left force: ${e.target.value}`;       
+      let { value } = e.target;
+      force.set(value);
+      show_left.innerHTML = `Left force: ${Math.floor(force.magnitude)}`;
     }
 
 
@@ -68,27 +64,17 @@ class Universe extends Timelaps {
       this.show_fps.innerHTML = `FPS: ${this.FPS}`;
     }
 
-  document.addEventListener('keydown', (event) => {
-    const keyName = event.key;
-    console.log('key: ', keyName);
-    if(keyName === 'ArrowDown') this.top_ctrl.value--;    
-    if (keyName === 'ArrowUp') this.top_ctrl.value++;    
-    if (keyName === 'ArrowLeft') this.left_ctrl.value--;
-    if (keyName === 'ArrowRight') this.left_ctrl.value++;
-    
-  })
-
   }
 
   preload() {
     let { canvas, ctx, debug } = this;
     let forces = [
-      new Vector({ ctx, canvas, magnitude: 50, color: 'blue', direction: 0, id: 'left_force' }),
-      new Vector({ ctx, canvas, magnitude: 50, color: 'red', direction: 180, id: 'right_force' }),
+      new Vector({ ctx, canvas, magnitude: 50, color: 'blue', direction: 0, id: 'right_force' }),
+      new Vector({ ctx, canvas, magnitude: 50, color: 'red', direction: 180, id: 'left_force' }),
       new Vector({ ctx, canvas, magnitude: 50, color: 'green', direction: 90, id: 'top_force' }),
-      new Vector({ ctx, canvas, magnitude: 50, color: 'pink', direction: 270, id: 'bottom_force' }),
+      new Vector({ ctx, canvas, magnitude: 50, color: 'purple', direction: 270, id: 'bottom_force' }),
     ]
-    this.spaceship = new SpaceShip({ canvas, ctx, debug, forces, mass: 100000000000 });
+    this.spaceship = new SpaceShip({ speedUp: false, canvas, ctx, debug, forces, mass: 1, maxVelocity: 10 });
   }
 
   update() {
@@ -97,7 +83,7 @@ class Universe extends Timelaps {
   }
 
   render() {
-    let { canvas, ctx } = this;
+    let { canvas, ctx, debug } = this;
     this.then = this.now - (this.delta % this.interval);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.save();
@@ -106,7 +92,7 @@ class Universe extends Timelaps {
     let y = canvas.height / 2;
     ctx.translate(x, y);
     //ctx.scale(1, -1);
-    this.drawCroos();
+    if(debug) this.drawCroos();
     this.update();
     ctx.closePath();
     ctx.restore();

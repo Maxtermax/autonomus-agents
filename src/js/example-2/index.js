@@ -27,7 +27,7 @@ class Universe extends Timelaps {
 
     this.amplitude_ctrl.onchange = e => {
       this.amplitude = Number(this.amplitude_ctrl.value);
-      this.show_amplitude.innerHTML = `Amplitude: ${Number(this.amplitude_ctrl.value)}`;      
+      this.show_amplitude.innerHTML = `Longitud: ${Number(this.amplitude_ctrl.value)}`;      
     }
 
     this.frecuencia_ctrl.onchange = e => {
@@ -43,20 +43,30 @@ class Universe extends Timelaps {
 
   preload() {
     let { canvas, ctx, debug } = this;
-    this.spaceship = new SpaceShip({canvas, ctx, debug});
+    this.spaceship = new SpaceShip({
+      canvas, 
+      ctx, 
+      debug, 
+      x: -canvas.width/2    
+    });
+    this.spaceship.normalX = 0;
   }
 
   update() {
     let { canvas, ctx, spaceship, direction, amplitude, frecuencia } = this;
+    if ((spaceship.position.x - spaceship.width) >= canvas.width/2) spaceship.position.x = -(canvas.width/2);    
+    spaceship.info.data = `deg: ${Math.floor(spaceship.angle)}, x: ${Math.floor(spaceship.position.x)}, y: ${Math.floor(spaceship.position.y)}`
     spaceship.angle = Math.cos(this.direction) * frecuencia;
     spaceship.position.y += Math.cos(this.direction) * frecuencia;
-    spaceship.position.x += 0.3;
+    spaceship.position.x += 0.3;    
+    spaceship.normalX += 0.3;
     spaceship.render();
     this.direction -= amplitude;
   }
 
+
   render() {
-    let { canvas, ctx } = this;
+    let { canvas, ctx, debug, spaceship } = this;
     this.then = this.now - (this.delta % this.interval);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.save();
@@ -65,10 +75,10 @@ class Universe extends Timelaps {
     let y = canvas.height / 2;
     ctx.translate(x, y);
     //ctx.scale(1, -1);
-    this.drawCroos();
-    this.update();
+    if(debug) this.drawCroos();
+    this.update();        
     ctx.closePath();
-    ctx.restore();    
+    ctx.restore();        
   }
 
   drawCroos() {

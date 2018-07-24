@@ -1,11 +1,12 @@
-import Grid from './Grid.js'
 export default class Vector {
-  constructor({ctx, translateX = 0, translateY = 0, size = 5, canvas, magnitude, direction = 0, id, display = true, refs = [], color = 'red'}) {
+  constructor({ctx, translateX = 0, translateY = 0, size = 5, canvas, magnitude, direction = 0, id, display = true, color = 'red'}) {
     this.ctx = ctx;
     this.canvas = canvas;
     this.color = color;
     this.magnitude = magnitude;
     this.direction = direction * Math.PI / 180;
+    //console.log('magnitude: ', magnitude);
+    //console.log('direction: ', this.direction);
     this.x = Math.round(magnitude * Math.cos(this.direction));
     this.y = Math.round(magnitude * Math.sin(this.direction));
     this.translateX = translateX;
@@ -13,14 +14,6 @@ export default class Vector {
     this.size = size;
     this.id = id;
     this.display = display;
-    this.refs = refs;
-    this.grid = new Grid({
-      ctx,
-      width: 100,
-      height: 100,
-      padding: 10,
-      color: 'blue' 
-    });
   }
 
   drawHead() {
@@ -51,6 +44,12 @@ export default class Vector {
     }
   }
 
+  set(mag) {
+    this.magnitude = mag;
+    this.x = Math.round(this.magnitude * Math.cos(this.direction));
+    this.y = Math.round(this.magnitude * Math.sin(this.direction));
+  }
+
   mult(n) {
     this.x = this.x * n;
     this.y = this.y * n;        
@@ -66,6 +65,10 @@ export default class Vector {
     this.y += vector.y;
     //this.magnitude = Math.sqrt(Math.pow(this.x, 2), Math.pow(this.y, 2));    
     //this.direction = Math.atan2(this.y, this.x);
+  }
+
+  getMagnitude() {    
+    return Math.sqrt(Math.pow(this.x, 2), Math.pow(this.y, 2));   
   }
 
   div(vector) {
@@ -91,6 +94,13 @@ export default class Vector {
     ctx.stroke();
     ctx.closePath();
     ctx.restore();    
+  }
+
+  clone(data = {}) {
+    let { ctx, translateX, translateY, size, canvas, magnitude, direction, id, display, color } = this;
+    console.log(direction);
+    let copy = new Vector({ ctx, translateX, translateY, size, canvas, magnitude, direction, id, display, color, ...data});
+    return copy;
   }
 
   update() {

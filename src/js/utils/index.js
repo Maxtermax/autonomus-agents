@@ -10,10 +10,10 @@ export const isCollide = (type = 'square', a, b) => {
     let y = (a.y >= b.y) && (a.y <= b.y + (b.height || b.bulletHeight));
     return x && y;
   }
-  if (type === 'circle') {
+  if (type === 'circle') {   
     let overLapX = a.x + a.r >= b.x - b.r && a.x - a.r <= b.x + b.r;
     let overLapY = a.y + a.r >= b.y - b.r && a.y - a.r <= b.y + b.r;
-    return overLapX && overLapY;
+    return overLapX && overLapX;
   }
 }
 
@@ -34,7 +34,7 @@ export const calcCartesiano = (candidateX, candidateY, canvas) => {
     return { x, y };
 }
 
-export const coordidatesToDeg = (x, y) => {
+export const coordinatesToDeg = (x, y) => {
   let rad = Math.atan2(y, x);
   let deg = rad * 360 / (2* Math.PI);
   return deg;
@@ -100,4 +100,22 @@ export const hover = (element = window, cb) => {
 
 export const getRandomInt = (min, max) => {
   return Math.floor(Math.random() * (max - min + 1) + min);
+}
+
+export const vectorSubtraction = (a, b) => {
+  let result = { };
+  result.x = a.x - b.x;
+  result.y = a.y - b.y;      
+  return result;  
+}
+
+export const computeForce = (force, scale) => {
+  let { x, y } = force;
+  if (scale !== 0) {
+    return {
+      x: x / scale,
+      y: y / scale
+    }
+  }
+  return { x, y };
 }

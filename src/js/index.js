@@ -1,6 +1,10 @@
 import VectorsBehavior from './example-1/index.js';
 import EntitySenoidalMovement from './example-2/index.js';
 import EntityApplyForces from './example-3/index.js';
+import EntityApplyAcceleration from './example-4/index.js';
+import ObjectsCollision from './example-5/index.js';
+import EntitySeekTarget from './example-6/index.js';
+import EntitySteeringBehavior from './example-7/index.js';
 
 class Router {
   constructor(routes) {
@@ -57,5 +61,33 @@ let pages = new Router([
     init: () => {
       EntityApplyForces();
     }    
+  },
+  {
+    page: '#example-4',
+    view: `example-4.html`,
+    init: () => {
+      EntityApplyAcceleration();
+    }        
+  },
+  {
+    page: '#example-5',
+    view: `example-5.html`,
+    init: () => {
+      ObjectsCollision();
+    }            
+  },
+  {
+    page: '#example-6',
+    view: `example-6.html`,
+    init: () => {
+      EntitySeekTarget();
+    }                
+  },
+  {
+    page: '#example-7',
+    view: `example-7.html`,
+    init: () => {
+      EntitySteeringBehavior();
+    }                    
   }
 ])
