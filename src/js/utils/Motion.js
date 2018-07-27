@@ -2,7 +2,7 @@ import Vector from '../components/Vector.js'
 import { guid, coordinatesToDeg, calcCartesiano, computeForce, vectorSubtraction } from '../utils/index.js'
 
 export default class Motion {
-  constructor({ ctx, speedUp = true, segments = [], maxForce, targets = [], maxVelocity = 5, canvas, debug = false, mass = 40, forces = [], x = 0, y = 0, angle = 0, velocity = 0, acceleration = 0 }) {
+  constructor({ ctx, speedUp = true, segments = [], id = guid(), maxForce, targets = [], maxVelocity = 5, canvas, debug = false, mass = 40, forces = [], x = 0, y = 0, angle = 0, velocity = 0, acceleration = 0 }) {
     this.speedUp = speedUp;
     this.maxVelocity = maxVelocity;
     this.maxForce = maxForce;
@@ -12,7 +12,8 @@ export default class Motion {
     this.debug = debug;
     this.segments = [];
     this.targets = targets;
-    this.mass = mass + 15;
+    this.id = id;
+    this.mass = mass;
     //console.log('x: ', x, ' y: ', y)
     let mag = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
     //console.log('maginutude: ', mag)
@@ -117,7 +118,7 @@ export default class Motion {
       segment.translateX = calc.translateX;
       segment.translateY = calc.translateY;
       segment.direction = calc.direction;
-      segment.set(calc.magnitude);
+      segment.setMagnitude(calc.magnitude);
       if (debug) {
         segment.display = true;
         segment.render();
@@ -130,17 +131,23 @@ export default class Motion {
     this.targets.push(target);
   }
 
-  joinCircles(target) {
+  joinCircles(target, spot = null, color = 'white') {
     let { ctx, position, canvas, debug } = this;
-    let segment = this.calculateSegment(target);
-    this.segments.push(new Vector({ ...segment, ctx, display: debug, color: 'white', canvas, id: target.id }));
+    let segment = this.calculateSegment(target, spot);
+    let link = new Vector({ ...segment, ctx, display: debug, color, canvas, id: target.id });
+    this.segments.push(link);
   }
 
-  calculateSegment(target) {
-    let { ctx, position } = this;
-    let { x, y } = vectorSubtraction(target.position, position);
-    let direction = coordinatesToDeg(x, y) * Math.PI / 180;
-    let magnitude = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
+  calculateSegment(target, spot = null) {
+    let { ctx } = this;
+    let position;
+    if(spot) {
+      //console.log('spot: ', spot)
+      position = spot;
+    } else {
+      position = this.position;
+    }   
+    let { x, y, magnitude, direction } = vectorSubtraction(target.position, position);
     let translateX = position.x;
     let translateY = position.y;
     return { direction, magnitude, x, y, translateX, translateY };
@@ -155,7 +162,7 @@ export default class Motion {
 
   move(force) {
     let { acceleration, velocity, position, mass, speedUp, maxVelocity } = this;
-    let computed = computeForce(force, mass);  
+    let computed = computeForce(force, mass);
     if (speedUp) {
       //console.log(velocity.getMagnitude(), ' ', maxVelocity);
       if (velocity.getMagnitude() > maxVelocity) {

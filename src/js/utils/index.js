@@ -1,16 +1,16 @@
-export const calcCenter = (container, item) => {
+const calcCenter = (container, item) => {
   let x = container.x + (container.width / 2) - (item.width / 2);
   let y = container.y + (container.height / 2) - (item.height / 2);
   return { y, x }
 }
 
-export const isCollide = (type = 'square', a, b) => {
+const isCollide = (type = 'square', a, b) => {
   if (type === 'square') {
     let x = (a.x >= b.x) && (a.x <= b.x + (b.width || b.bulletWidth));
     let y = (a.y >= b.y) && (a.y <= b.y + (b.height || b.bulletHeight));
     return x && y;
   }
-  if (type === 'circle') {   
+  if (type === 'circle') {
     let overLapX = a.x + a.r >= b.x - b.r && a.x - a.r <= b.x + b.r;
     let overLapY = a.y + a.r >= b.y - b.r && a.y - a.r <= b.y + b.r;
     return overLapX && overLapX;
@@ -18,7 +18,7 @@ export const isCollide = (type = 'square', a, b) => {
 }
 
 
-export const guid = () => {
+const guid = () => {
   function s4() {
     return Math.floor((1 + Math.random()) * 0x10000)
       .toString(16)
@@ -27,20 +27,20 @@ export const guid = () => {
   return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
 }
 
-export const calcCartesiano = (candidateX, candidateY, canvas) => {
-    let x = candidateX-(canvas.width/2);
-    //console.log(x)
-    let y = (canvas.height/2) - candidateY;    
-    return { x, y };
+const calcCartesiano = (candidateX, candidateY, canvas) => {
+  let x = candidateX - (canvas.width / 2);
+  //console.log(x)
+  let y = (canvas.height / 2) - candidateY;
+  return { x, y };
 }
 
-export const coordinatesToDeg = (x, y) => {
+const coordinatesToDeg = (x, y) => {
   let rad = Math.atan2(y, x);
-  let deg = rad * 360 / (2* Math.PI);
+  let deg = rad * 360 / (2 * Math.PI);
   return deg;
 }
 
-export const getMousePos = (canvas, evt) => {
+const getMousePos = (canvas, evt) => {
   var rect = canvas.getBoundingClientRect();
   return {
     x: evt.clientX - rect.left,
@@ -48,9 +48,7 @@ export const getMousePos = (canvas, evt) => {
   }
 }
 
-
-
-export const touchEvents = (DOMelement, type = 'drag', cb) => {
+const touchEvents = (DOMelement, type = 'drag', cb) => {
   if (type === 'drag') {
     let hold = false;
     DOMelement.addEventListener("touchstart", (e) => hold = true, false);
@@ -76,40 +74,36 @@ export const touchEvents = (DOMelement, type = 'drag', cb) => {
   }
 }
 
-export const everyFrame = (data, cb) => {
+const everyFrame = (data, cb) => {
   let delta = Date.now() - data.initialTime;
   //console.log('delta  ', delta)
   if (delta >= data.futureTime) {
     cb(data);
-    data.initialTime = Date.now();  
+    data.initialTime = Date.now();
   }
 }
 
-export const clear = (canvas) => canvas.width = canvas.width;
-
-export const hover = (element = window, cb) => {
-  element.addEventListener('mousemove', function (e) {
-    let data = element.getBoundingClientRect();
-    let x = e.clientX - data.x;
-    let y = e.clientY - data.y;
-    if (x < 0) x = 0;
-    if (y < 0) y = 0;
-    cb({ x, y });
-  })
-}
-
-export const getRandomInt = (min, max) => {
+const getRandomInt = (min, max) => {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
-export const vectorSubtraction = (a, b) => {
-  let result = { };
+const vectorSubtraction = (a, b) => {
+  let result = {};
   result.x = a.x - b.x;
-  result.y = a.y - b.y;      
-  return result;  
+  result.y = a.y - b.y;
+  result.magnitude = Math.sqrt(Math.pow(result.x, 2) + Math.pow(result.y, 2));
+  result.direction = coordinatesToDeg(result.x, result.y) * Math.PI / 180;
+  return result;
 }
 
-export const computeForce = (force, scale) => {
+const vectorAddition = (a, b) => {
+  let result = {};
+  result.x = a.x + b.x;
+  result.y = a.y + b.y;
+  return result;
+}
+
+const computeForce = (force, scale) => {
   let { x, y } = force;
   if (scale !== 0) {
     return {
@@ -118,4 +112,19 @@ export const computeForce = (force, scale) => {
     }
   }
   return { x, y };
+}
+
+module.exports = {
+  calcCenter,
+  isCollide,
+  guid,
+  calcCartesiano,
+  coordinatesToDeg,
+  getMousePos,
+  touchEvents,
+  everyFrame,
+  getRandomInt,
+  vectorSubtraction,
+  computeForce,
+  vectorAddition
 }

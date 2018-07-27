@@ -76,7 +76,7 @@ class Universe extends Timelaps {
     });
     if (targets.length) {
       targets[smaller].color = 'blue';
-      let steer = spaceship.calculateSteering(targets[smaller].id, (steer, desired) => {
+      let steer = spaceship.landSteering(targets[smaller].id, (steer, desired) => {
         spaceship.forces[0] = steer;
         spaceship.forces[1] = desired;
       }, (segmentIndex, targetIndex) => {
@@ -111,14 +111,14 @@ class Universe extends Timelaps {
   generateTarget({ x, y }) {
     let { ctx, canvas, debug, spaceship, targets } = this;
     let size = 10 + Math.random() * 100;
-    let target = new Circle({ stroke: true, ctx, canvas, x, y, size, debug, color: 'red' });
+    let target = new Circle({ stroke: false, ctx, canvas, x, y, size, debug, color: 'red' });
     targets.push(target);
     spaceship.addTarget(target);
   }
 
   preload() {
     let { canvas, ctx, debug } = this;
-    this.spaceship = new SpaceShip({ ctx, mass: 12, canvas, maxVelocity: 40, maxForce: 0.6  });
+    this.spaceship = new SpaceShip({ ctx, mass: 24, canvas, maxForce: 0.6  });
     //this.generateTarget({ x: -100, y: -100 });
     canvas.addEventListener('mouseup', e => {
       let mousePos = getMousePos(canvas, e);

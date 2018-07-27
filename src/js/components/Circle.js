@@ -1,5 +1,6 @@
 import TextBox from '../components/TextBox.js'
 import Vector from '../components/Vector.js'
+import Grid from '../components/Grid.js'
 import Motion from '../utils/Motion.js'
 import * as physicsEngine from '../utils/index.js'
 
@@ -15,14 +16,12 @@ export default class Circle extends Motion {
     this.info = new TextBox({ ctx, x, y, id: 'info', data: `x: ${this.position.x}, y: ${this.position.y}` });
   }
 
-
-
   update() {
     let { debug, info, position } = this;
     info.x = position.x;
     info.y = -position.y + 30;
     if (debug) {
-      info.render();
+      //info.render();
       position.display = true;
       position.render();
     }

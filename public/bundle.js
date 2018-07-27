@@ -323,16 +323,13 @@ module.exports = function (exec) {
 "use strict";
 
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-var calcCenter = exports.calcCenter = function calcCenter(container, item) {
+var calcCenter = function calcCenter(container, item) {
   var x = container.x + container.width / 2 - item.width / 2;
   var y = container.y + container.height / 2 - item.height / 2;
   return { y: y, x: x };
 };
 
-var isCollide = exports.isCollide = function isCollide() {
+var isCollide = function isCollide() {
   var type = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'square';
   var a = arguments[1];
   var b = arguments[2];
@@ -349,27 +346,27 @@ var isCollide = exports.isCollide = function isCollide() {
   }
 };
 
-var guid = exports.guid = function guid() {
+var guid = function guid() {
   function s4() {
     return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
   }
   return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
 };
 
-var calcCartesiano = exports.calcCartesiano = function calcCartesiano(candidateX, candidateY, canvas) {
+var calcCartesiano = function calcCartesiano(candidateX, candidateY, canvas) {
   var x = candidateX - canvas.width / 2;
   //console.log(x)
   var y = canvas.height / 2 - candidateY;
   return { x: x, y: y };
 };
 
-var coordinatesToDeg = exports.coordinatesToDeg = function coordinatesToDeg(x, y) {
+var coordinatesToDeg = function coordinatesToDeg(x, y) {
   var rad = Math.atan2(y, x);
   var deg = rad * 360 / (2 * Math.PI);
   return deg;
 };
 
-var getMousePos = exports.getMousePos = function getMousePos(canvas, evt) {
+var getMousePos = function getMousePos(canvas, evt) {
   var rect = canvas.getBoundingClientRect();
   return {
     x: evt.clientX - rect.left,
@@ -377,7 +374,7 @@ var getMousePos = exports.getMousePos = function getMousePos(canvas, evt) {
   };
 };
 
-var touchEvents = exports.touchEvents = function touchEvents(DOMelement) {
+var touchEvents = function touchEvents(DOMelement) {
   var type = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'drag';
   var cb = arguments[2];
 
@@ -414,7 +411,7 @@ var touchEvents = exports.touchEvents = function touchEvents(DOMelement) {
   }
 };
 
-var everyFrame = exports.everyFrame = function everyFrame(data, cb) {
+var everyFrame = function everyFrame(data, cb) {
   var delta = Date.now() - data.initialTime;
   //console.log('delta  ', delta)
   if (delta >= data.futureTime) {
@@ -423,36 +420,27 @@ var everyFrame = exports.everyFrame = function everyFrame(data, cb) {
   }
 };
 
-var clear = exports.clear = function clear(canvas) {
-  return canvas.width = canvas.width;
-};
-
-var hover = exports.hover = function hover() {
-  var element = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : window;
-  var cb = arguments[1];
-
-  element.addEventListener('mousemove', function (e) {
-    var data = element.getBoundingClientRect();
-    var x = e.clientX - data.x;
-    var y = e.clientY - data.y;
-    if (x < 0) x = 0;
-    if (y < 0) y = 0;
-    cb({ x: x, y: y });
-  });
-};
-
-var getRandomInt = exports.getRandomInt = function getRandomInt(min, max) {
+var getRandomInt = function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1) + min);
 };
 
-var vectorSubtraction = exports.vectorSubtraction = function vectorSubtraction(a, b) {
+var vectorSubtraction = function vectorSubtraction(a, b) {
   var result = {};
   result.x = a.x - b.x;
   result.y = a.y - b.y;
+  result.magnitude = Math.sqrt(Math.pow(result.x, 2) + Math.pow(result.y, 2));
+  result.direction = coordinatesToDeg(result.x, result.y) * Math.PI / 180;
   return result;
 };
 
-var computeForce = exports.computeForce = function computeForce(force, scale) {
+var vectorAddition = function vectorAddition(a, b) {
+  var result = {};
+  result.x = a.x + b.x;
+  result.y = a.y + b.y;
+  return result;
+};
+
+var computeForce = function computeForce(force, scale) {
   var x = force.x,
       y = force.y;
 
@@ -463,6 +451,21 @@ var computeForce = exports.computeForce = function computeForce(force, scale) {
     };
   }
   return { x: x, y: y };
+};
+
+module.exports = {
+  calcCenter: calcCenter,
+  isCollide: isCollide,
+  guid: guid,
+  calcCartesiano: calcCartesiano,
+  coordinatesToDeg: coordinatesToDeg,
+  getMousePos: getMousePos,
+  touchEvents: touchEvents,
+  everyFrame: everyFrame,
+  getRandomInt: getRandomInt,
+  vectorSubtraction: vectorSubtraction,
+  computeForce: computeForce,
+  vectorAddition: vectorAddition
 };
 
 /***/ }),
@@ -1089,6 +1092,10 @@ var _index13 = __webpack_require__(163);
 
 var _index14 = _interopRequireDefault(_index13);
 
+var _index15 = __webpack_require__(164);
+
+var _index16 = _interopRequireDefault(_index15);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var Router = function () {
@@ -1204,6 +1211,12 @@ var pages = new Router([{
   view: 'example-7.html',
   init: function init() {
     (0, _index14.default)();
+  }
+}, {
+  page: '#example-8',
+  view: 'example-8.html',
+  init: function init() {
+    (0, _index16.default)();
   }
 }]);
 
@@ -2107,6 +2120,8 @@ var _createClass2 = __webpack_require__(1);
 
 var _createClass3 = _interopRequireDefault(_createClass2);
 
+var _index = __webpack_require__(14);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var Vector = function () {
@@ -2122,7 +2137,8 @@ var Vector = function () {
         magnitude = _ref.magnitude,
         _ref$direction = _ref.direction,
         direction = _ref$direction === undefined ? 0 : _ref$direction,
-        id = _ref.id,
+        _ref$id = _ref.id,
+        id = _ref$id === undefined ? (0, _index.guid)() : _ref$id,
         _ref$display = _ref.display,
         display = _ref$display === undefined ? true : _ref$display,
         _ref$color = _ref.color,
@@ -2146,7 +2162,14 @@ var Vector = function () {
   }
 
   (0, _createClass3.default)(Vector, [{
-    key: "drawHead",
+    key: 'limit',
+    value: function limit(max) {
+      var magnitude = this.magnitude;
+
+      if (magnitude > max) this.setMagnitude(max);
+    }
+  }, {
+    key: 'drawHead',
     value: function drawHead() {
       var ctx = this.ctx,
           x = this.x,
@@ -2176,7 +2199,7 @@ var Vector = function () {
       ctx.restore();
     }
   }, {
-    key: "normalize",
+    key: 'normalize',
     value: function normalize() {
       var magnitude = this.magnitude,
           x = this.x,
@@ -2188,45 +2211,50 @@ var Vector = function () {
       }
     }
   }, {
-    key: "set",
-    value: function set(mag) {
+    key: 'setMagnitude',
+    value: function setMagnitude(mag) {
       this.magnitude = mag;
       this.x = Math.round(this.magnitude * Math.cos(this.direction));
       this.y = Math.round(this.magnitude * Math.sin(this.direction));
     }
   }, {
-    key: "mult",
+    key: 'mult',
     value: function mult(n) {
       this.x = this.x * n;
       this.y = this.y * n;
     }
   }, {
-    key: "sub",
+    key: 'sub',
     value: function sub(vector) {
       this.x = this.x - vector.x;
       this.y = this.y - vector.y;
     }
   }, {
-    key: "add",
+    key: 'setDirection',
+    value: function setDirection(x, y) {
+      this.direction = Math.atan2(y, x);
+      this.x = Math.round(this.magnitude * Math.cos(this.direction));
+      this.y = Math.round(this.magnitude * Math.sin(this.direction));
+    }
+  }, {
+    key: 'add',
     value: function add(vector) {
       this.x += vector.x;
       this.y += vector.y;
-      //this.magnitude = Math.sqrt(Math.pow(this.x, 2), Math.pow(this.y, 2));    
-      //this.direction = Math.atan2(this.y, this.x);
     }
   }, {
-    key: "getMagnitude",
+    key: 'getMagnitude',
     value: function getMagnitude() {
-      return Math.sqrt(Math.pow(this.x, 2), Math.pow(this.y, 2));
+      return Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2));
     }
   }, {
-    key: "div",
+    key: 'div',
     value: function div(vector) {
       this.x = this.x / vector.x;
       this.y = this.y / vector.y;
     }
   }, {
-    key: "drawTail",
+    key: 'drawTail',
     value: function drawTail() {
       var ctx = this.ctx,
           magnitude = this.magnitude,
@@ -2257,7 +2285,7 @@ var Vector = function () {
       ctx.restore();
     }
   }, {
-    key: "clone",
+    key: 'clone',
     value: function clone() {
       var data = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
       var ctx = this.ctx,
@@ -2271,19 +2299,19 @@ var Vector = function () {
           display = this.display,
           color = this.color;
 
-      console.log(direction);
+      direction = direction / Math.PI * 180;
       var copy = new Vector((0, _assign2.default)({ ctx: ctx, translateX: translateX, translateY: translateY, size: size, canvas: canvas, magnitude: magnitude, direction: direction, id: id, display: display, color: color }, data));
       return copy;
     }
   }, {
-    key: "update",
+    key: 'update',
     value: function update() {
       //let { magnitude, direction } = this;
       //this.x = Math.round(magnitude * Math.cos(direction));
       //this.y = Math.round(magnitude * Math.sin(direction));    
     }
   }, {
-    key: "render",
+    key: 'render',
     value: function render() {
       var ctx = this.ctx,
           display = this.display;
@@ -4648,6 +4676,8 @@ var SpaceShip = function (_Motion) {
         speedUp = _ref$speedUp === undefined ? true : _ref$speedUp,
         _ref$stroke = _ref.stroke,
         stroke = _ref$stroke === undefined ? true : _ref$stroke,
+        _ref$skin = _ref.skin,
+        skin = _ref$skin === undefined ? 'explorer' : _ref$skin,
         _ref$size = _ref.size,
         size = _ref$size === undefined ? 20 : _ref$size,
         _ref$maxVelocity = _ref.maxVelocity,
@@ -4685,7 +4715,7 @@ var SpaceShip = function (_Motion) {
         display = _ref$display === undefined ? true : _ref$display;
     (0, _classCallCheck3.default)(this, SpaceShip);
 
-    var _this = (0, _possibleConstructorReturn3.default)(this, (SpaceShip.__proto__ || (0, _getPrototypeOf2.default)(SpaceShip)).call(this, { ctx: ctx, canvas: canvas, speedUp: speedUp, mass: mass, x: x, y: y, maxVelocity: maxVelocity, maxForce: maxForce }));
+    var _this = (0, _possibleConstructorReturn3.default)(this, (SpaceShip.__proto__ || (0, _getPrototypeOf2.default)(SpaceShip)).call(this, { ctx: ctx, canvas: canvas, speedUp: speedUp, mass: mass, x: x, y: y, maxVelocity: maxVelocity, maxForce: maxForce, angle: angle, id: id }));
 
     _this.width = width;
     _this.height = height;
@@ -4696,6 +4726,7 @@ var SpaceShip = function (_Motion) {
     _this.forces = forces;
     _this.stroke = stroke;
     _this.canvas = canvas;
+    _this.skin = skin;
     _this.info = new _TextBox2.default({ ctx: ctx, x: x, y: y, id: 'info', data: 'deg: ' + _this.position.direction + ', x: ' + _this.position.x + ', y: ' + _this.position.y });
     return _this;
   }
@@ -4706,7 +4737,7 @@ var SpaceShip = function (_Motion) {
       var angle = this.angle,
           mass = this.mass,
           width = this.width,
-          follower = this.follower,
+          skin = this.skin,
           height = this.height,
           position = this.position,
           ctx = this.ctx,
@@ -4718,6 +4749,7 @@ var SpaceShip = function (_Motion) {
       var x = position.x,
           y = position.y;
 
+
       ctx.save(); //save angle
       ctx.beginPath();
       ctx.scale(1, -1);
@@ -4727,17 +4759,6 @@ var SpaceShip = function (_Motion) {
       ctx.rotate(angle);
       ctx.lineWidth = 8;
       ctx.lineCap = 'round';
-      /*
-      ctx.lineTo(-(width/2), height/2);
-      ctx.lineTo(width/2, -(height/2)+height/2);
-      ctx.lineTo(-(width/2), -height/2);    
-      
-      ctx.lineTo(-(width/2), height/2);
-      ctx.lineTo(width/2, -(height/2)+height/2);
-      ctx.lineTo(-(width/2), -height/2);    
-      ctx.lineTo(-width, -(height/2)+height/2);
-      ctx.lineTo(-(width/2), height/2);
-      */
 
       ctx.lineTo(-(width / 2), height / 2);
       ctx.lineTo(width / 2, -(height / 2) + height / 2);
@@ -4751,7 +4772,7 @@ var SpaceShip = function (_Motion) {
       acceleration.render();
       velocity.render();
       position.render();
-      this.drawShildForce();
+      if (debug) this.drawShildForce();
     }
   }, {
     key: 'drawShildForce',
@@ -4761,7 +4782,8 @@ var SpaceShip = function (_Motion) {
           color = this.color,
           size = this.size,
           position = this.position,
-          stroke = this.stroke;
+          stroke = this.stroke,
+          skin = this.skin;
       var x = position.x,
           y = position.y;
 
@@ -4782,17 +4804,13 @@ var SpaceShip = function (_Motion) {
   }, {
     key: 'updateInfo',
     value: function updateInfo() {
-      var position = this.position,
-          info = this.info,
-          mass = this.mass,
-          angle = this.angle,
-          vectors = this.vectors,
-          acceleration = this.acceleration;
+      /*
+      let { position, info, mass, angle, vectors, acceleration } = this;
       //  info.data = `deg: ${Math.floor(angle)}, x: ${Math.floor(position.x)}, y: ${Math.floor(position.y)}`;
-
       info.x = position.x;
       info.y = -position.y + 30;
       info.render();
+      */
     }
   }, {
     key: 'stop',
@@ -4829,8 +4847,45 @@ var SpaceShip = function (_Motion) {
       }
     }
   }, {
-    key: 'calculateSteering',
-    value: function calculateSteering(id, result, done) {
+    key: 'landSteering',
+    value: function landSteering(id, result, done) {
+      var segments = this.segments,
+          targets = this.targets,
+          velocity = this.velocity,
+          canvas = this.canvas,
+          ctx = this.ctx,
+          debug = this.debug,
+          maxForce = this.maxForce;
+
+      var segment = this.getSegment(id);
+      var target = this.getTarget(id);
+      if (segment && target) {
+        this.angle = segment.direction;
+        if (this.isCollide(target)) {
+          var segmentIndex = this.getSegmentIndex(id);
+          var targetIndex = this.getTargetIndex(id);
+          if (done) {
+            done(segmentIndex, targetIndex);
+          }
+        } else {
+          var desired = segment;
+
+          var _vectorSubtraction = (0, _index.vectorSubtraction)(desired, velocity),
+              magnitude = _vectorSubtraction.magnitude,
+              direction = _vectorSubtraction.direction;
+
+          var steer = new _Vector2.default({ ctx: ctx, canvas: canvas, magnitude: magnitude, direction: -direction, display: true, color: 'green' });
+          steer.limit(desired.getMagnitude() * maxForce);
+          if (result) result(steer, desired);
+        }
+      }
+    }
+  }, {
+    key: 'shouldEscape',
+    value: function shouldEscape() {}
+  }, {
+    key: 'seekSteering',
+    value: function seekSteering(id, result, done) {
       var segments = this.segments,
           targets = this.targets,
           velocity = this.velocity,
@@ -4850,14 +4905,12 @@ var SpaceShip = function (_Motion) {
         } else {
           var desired = segment;
 
-          var _vectorSubtraction = (0, _index.vectorSubtraction)(desired, velocity),
-              x = _vectorSubtraction.x,
-              y = _vectorSubtraction.y;
+          var _vectorSubtraction2 = (0, _index.vectorSubtraction)(desired, velocity),
+              magnitude = _vectorSubtraction2.magnitude,
+              direction = _vectorSubtraction2.direction;
 
-          var direction = -(0, _index.coordinatesToDeg)(x, y);
-          var magnitude = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
-          var steer = new _Vector2.default({ ctx: ctx, canvas: canvas, magnitude: magnitude, direction: direction, display: true, color: 'green' });
-          steer.mult(maxForce);
+          var steer = new _Vector2.default({ ctx: ctx, canvas: canvas, magnitude: magnitude, direction: direction, color: 'green' });
+          steer.limit(desired.getMagnitude() * maxForce);
           if (result) result(steer, desired);
         }
       }
@@ -4883,12 +4936,10 @@ var SpaceShip = function (_Motion) {
         } else {
           var desired = segment;
 
-          var _vectorSubtraction2 = (0, _index.vectorSubtraction)(desired, velocity),
-              x = _vectorSubtraction2.x,
-              y = _vectorSubtraction2.y;
+          var _vectorSubtraction3 = (0, _index.vectorSubtraction)(desired, velocity),
+              magnitude = _vectorSubtraction3.magnitude,
+              direction = _vectorSubtraction3.direction;
 
-          var direction = (0, _index.coordinatesToDeg)(x, y);
-          var magnitude = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
           var steer = new _Vector2.default({ ctx: ctx, canvas: canvas, magnitude: magnitude, direction: direction, display: true, color: 'green' });
           this.move(steer);
         }
@@ -4897,14 +4948,7 @@ var SpaceShip = function (_Motion) {
   }, {
     key: 'render',
     value: function render() {
-      var width = this.width,
-          height = this.height,
-          x = this.x,
-          y = this.y,
-          ctx = this.ctx,
-          angle = this.angle,
-          color = this.color,
-          debug = this.debug;
+      var debug = this.debug;
 
       this.update();
       if (debug) this.updateInfo();
@@ -5795,6 +5839,8 @@ var Motion = function () {
         speedUp = _ref$speedUp === undefined ? true : _ref$speedUp,
         _ref$segments = _ref.segments,
         segments = _ref$segments === undefined ? [] : _ref$segments,
+        _ref$id = _ref.id,
+        id = _ref$id === undefined ? (0, _index.guid)() : _ref$id,
         maxForce = _ref.maxForce,
         _ref$targets = _ref.targets,
         targets = _ref$targets === undefined ? [] : _ref$targets,
@@ -5828,7 +5874,8 @@ var Motion = function () {
     this.debug = debug;
     this.segments = [];
     this.targets = targets;
-    this.mass = mass + 15;
+    this.id = id;
+    this.mass = mass;
     //console.log('x: ', x, ' y: ', y)
     var mag = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
     //console.log('maginutude: ', mag)
@@ -5992,7 +6039,7 @@ var Motion = function () {
         segment.translateX = calc.translateX;
         segment.translateY = calc.translateY;
         segment.direction = calc.direction;
-        segment.set(calc.magnitude);
+        segment.setMagnitude(calc.magnitude);
         if (debug) {
           segment.display = true;
           segment.render();
@@ -6008,26 +6055,37 @@ var Motion = function () {
   }, {
     key: 'joinCircles',
     value: function joinCircles(target) {
+      var spot = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+      var color = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'white';
       var ctx = this.ctx,
           position = this.position,
           canvas = this.canvas,
           debug = this.debug;
 
-      var segment = this.calculateSegment(target);
-      this.segments.push(new _Vector2.default((0, _assign2.default)({}, segment, { ctx: ctx, display: debug, color: 'white', canvas: canvas, id: target.id })));
+      var segment = this.calculateSegment(target, spot);
+      var link = new _Vector2.default((0, _assign2.default)({}, segment, { ctx: ctx, display: debug, color: color, canvas: canvas, id: target.id }));
+      this.segments.push(link);
     }
   }, {
     key: 'calculateSegment',
     value: function calculateSegment(target) {
-      var ctx = this.ctx,
-          position = this.position;
+      var spot = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+      var ctx = this.ctx;
+
+      var position = void 0;
+      if (spot) {
+        //console.log('spot: ', spot)
+        position = spot;
+      } else {
+        position = this.position;
+      }
 
       var _vectorSubtraction = (0, _index.vectorSubtraction)(target.position, position),
           x = _vectorSubtraction.x,
-          y = _vectorSubtraction.y;
+          y = _vectorSubtraction.y,
+          magnitude = _vectorSubtraction.magnitude,
+          direction = _vectorSubtraction.direction;
 
-      var direction = (0, _index.coordinatesToDeg)(x, y) * Math.PI / 180;
-      var magnitude = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
       var translateX = position.x;
       var translateY = position.y;
       return { direction: direction, magnitude: magnitude, x: x, y: y, translateX: translateX, translateY: translateY };
@@ -6131,6 +6189,10 @@ var _Vector = __webpack_require__(93);
 
 var _Vector2 = _interopRequireDefault(_Vector);
 
+var _Grid = __webpack_require__(109);
+
+var _Grid2 = _interopRequireDefault(_Grid);
+
 var _Motion2 = __webpack_require__(160);
 
 var _Motion3 = _interopRequireDefault(_Motion2);
@@ -6205,7 +6267,7 @@ var Circle = function (_Motion) {
       info.x = position.x;
       info.y = -position.y + 30;
       if (debug) {
-        info.render();
+        //info.render();
         position.display = true;
         position.render();
       }
@@ -6611,7 +6673,7 @@ var Universe = function (_Timelaps) {
       });
       if (targets.length) {
         targets[smaller].color = 'blue';
-        var steer = spaceship.calculateSteering(targets[smaller].id, function (steer, desired) {
+        var steer = spaceship.landSteering(targets[smaller].id, function (steer, desired) {
           spaceship.forces[0] = steer;
           spaceship.forces[1] = desired;
         }, function (segmentIndex, targetIndex) {
@@ -6653,7 +6715,7 @@ var Universe = function (_Timelaps) {
           targets = this.targets;
 
       var size = 10 + Math.random() * 100;
-      var target = new _Circle2.default({ stroke: true, ctx: ctx, canvas: canvas, x: x, y: y, size: size, debug: debug, color: 'red' });
+      var target = new _Circle2.default({ stroke: false, ctx: ctx, canvas: canvas, x: x, y: y, size: size, debug: debug, color: 'red' });
       targets.push(target);
       spaceship.addTarget(target);
     }
@@ -6666,7 +6728,7 @@ var Universe = function (_Timelaps) {
           ctx = this.ctx,
           debug = this.debug;
 
-      this.spaceship = new _SpaceShip2.default({ ctx: ctx, mass: 12, canvas: canvas, maxVelocity: 40, maxForce: 0.6 });
+      this.spaceship = new _SpaceShip2.default({ ctx: ctx, mass: 24, canvas: canvas, maxForce: 0.6 });
       //this.generateTarget({ x: -100, y: -100 });
       canvas.addEventListener('mouseup', function (e) {
         var mousePos = (0, _index.getMousePos)(canvas, e);
@@ -6685,6 +6747,840 @@ var Universe = function (_Timelaps) {
   }]);
   return Universe;
 }(_Timelaps3.default);
+
+/***/ }),
+/* 164 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _getIterator2 = __webpack_require__(103);
+
+var _getIterator3 = _interopRequireDefault(_getIterator2);
+
+var _getPrototypeOf = __webpack_require__(54);
+
+var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
+
+var _classCallCheck2 = __webpack_require__(0);
+
+var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+
+var _createClass2 = __webpack_require__(1);
+
+var _createClass3 = _interopRequireDefault(_createClass2);
+
+var _possibleConstructorReturn2 = __webpack_require__(58);
+
+var _possibleConstructorReturn3 = _interopRequireDefault(_possibleConstructorReturn2);
+
+var _inherits2 = __webpack_require__(84);
+
+var _inherits3 = _interopRequireDefault(_inherits2);
+
+exports.default = function () {
+  var intViewportWidth = window.innerWidth;
+  var intViewportHeight = window.innerHeight;
+  var canvas = document.getElementById('lienzo');
+  var canvasHeight = canvas.height = intViewportHeight;
+  var canvasWidth = canvas.width = intViewportWidth;
+  var ctx = canvas.getContext('2d');
+  var space = new Universe({ canvas: canvas, ctx: ctx });
+  space.preload();
+  space.render();
+};
+
+var _Explorer = __webpack_require__(166);
+
+var _Explorer2 = _interopRequireDefault(_Explorer);
+
+var _Hunter = __webpack_require__(165);
+
+var _Hunter2 = _interopRequireDefault(_Hunter);
+
+var _Circle = __webpack_require__(161);
+
+var _Circle2 = _interopRequireDefault(_Circle);
+
+var _Vector = __webpack_require__(93);
+
+var _Vector2 = _interopRequireDefault(_Vector);
+
+var _Timelaps2 = __webpack_require__(150);
+
+var _Timelaps3 = _interopRequireDefault(_Timelaps2);
+
+var _index = __webpack_require__(14);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var Universe = function (_Timelaps) {
+  (0, _inherits3.default)(Universe, _Timelaps);
+
+  function Universe(_ref) {
+    var canvas = _ref.canvas,
+        ctx = _ref.ctx;
+    (0, _classCallCheck3.default)(this, Universe);
+
+    var _this = (0, _possibleConstructorReturn3.default)(this, (Universe.__proto__ || (0, _getPrototypeOf2.default)(Universe)).call(this, { canvas: canvas, ctx: ctx }));
+
+    _this.play(_this.render.bind(_this));
+    _this.debug = false;
+    _this.fps_ctrl = document.getElementById('fps_ctrl');
+    _this.show_fps = document.getElementById('show_fps');
+
+    _this.debug_ctrl = document.getElementById('debug');
+    _this.targets = [];
+    _this.fps_ctrl.onchange = function (e) {
+      _this.FPS = e.target.value;
+      _this.show_fps.innerHTML = 'FPS: ' + _this.FPS;
+    };
+    _this.debug_ctrl.onchange = function (e) {
+      return _this.debug = _this.debug_ctrl.checked;
+    };
+    return _this;
+  }
+
+  (0, _createClass3.default)(Universe, [{
+    key: 'render',
+    value: function render() {
+      var _this2 = this;
+
+      var canvas = this.canvas,
+          ctx = this.ctx,
+          debug = this.debug,
+          hunters = this.hunters,
+          targets = this.targets;
+
+      this.then = this.now - this.delta % this.interval;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.save();
+      ctx.beginPath();
+      var x = canvas.width / 2;
+      var y = canvas.height / 2;
+      ctx.translate(x, y);
+      //ctx.scale(1, -1);
+      if (debug) this.drawCroos();
+      this.update();
+      hunters.forEach(function (hunter) {
+        return hunter.render();
+      });
+
+      targets.forEach(function (target) {
+        var _iteratorNormalCompletion = true;
+        var _didIteratorError = false;
+        var _iteratorError = undefined;
+
+        try {
+          for (var _iterator = (0, _getIterator3.default)(_this2.hunters), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+            var hunter = _step.value;
+
+            if (target.shouldRunFrom(hunter)) {
+              target.rangeView.color = 'red';
+              target.runAway(hunter);
+            } else {
+              target.rangeView.color = 'orange';
+              target.setSafeMove(hunter);
+            }
+          }
+        } catch (err) {
+          _didIteratorError = true;
+          _iteratorError = err;
+        } finally {
+          try {
+            if (!_iteratorNormalCompletion && _iterator.return) {
+              _iterator.return();
+            }
+          } finally {
+            if (_didIteratorError) {
+              throw _iteratorError;
+            }
+          }
+        }
+
+        target.render();
+      });
+      ctx.closePath();
+      ctx.restore();
+    }
+  }, {
+    key: 'drawCroos',
+    value: function drawCroos() {
+      var canvas = this.canvas,
+          ctx = this.ctx;
+
+      ctx.strokeStyle = 'white';
+      ctx.moveTo(0, -(canvas.height / 2));
+      ctx.lineTo(0, canvas.height / 2);
+      ctx.moveTo(-(canvas.width / 2), 0);
+      ctx.lineTo(canvas.width / 2, 0);
+      ctx.stroke();
+    }
+  }, {
+    key: 'theNearerOne',
+    value: function theNearerOne(hunter, targets) {
+      var smaller = hunter.segments[0];
+      var record = hunter.segments[0].getMagnitude();
+      hunter.segments.forEach(function (segment, index) {
+        if (segment.getMagnitude() < record && Math.random() > 0.000000002) {
+          record = segment.getMagnitude();
+          smaller = segment;
+        }
+      });
+      return targets.find(function (target) {
+        return target.id === smaller.id;
+      });
+    }
+  }, {
+    key: 'pullTarget',
+    value: function pullTarget(hunter, segmentIndex, targetIndex) {
+      var targets = this.targets;
+
+      hunter.segments.splice(segmentIndex, 1);
+      hunter.targets.splice(targetIndex, 1);
+      hunter.forces = [];
+      targets.splice(targetIndex, 1);
+    }
+  }, {
+    key: 'moveHunter',
+    value: function moveHunter(hunter, steer, desired) {
+      var targets = this.targets;
+
+      hunter.forces[0] = steer;
+      hunter.forces[1] = desired;
+    }
+  }, {
+    key: 'update',
+    value: function update() {
+      var canvas = this.canvas,
+          ctx = this.ctx,
+          debug = this.debug,
+          maxVelocity = this.maxVelocity,
+          targets = this.targets,
+          hunters = this.hunters;
+      var _iteratorNormalCompletion2 = true;
+      var _didIteratorError2 = false;
+      var _iteratorError2 = undefined;
+
+      try {
+        for (var _iterator2 = (0, _getIterator3.default)(hunters), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+          var hunter = _step2.value;
+
+          hunter.debug = debug;
+          if (hunter.position.x > canvas.width / 2) hunter.position.x += -canvas.width;
+          if (hunter.position.x < -canvas.width / 2) hunter.position.x += canvas.width;
+
+          if (hunter.position.y > canvas.height / 2) hunter.position.y += -canvas.height;
+          if (hunter.position.y < -canvas.height / 2) hunter.position.y += canvas.height;
+          if (targets.length) {
+            var nearer = this.theNearerOne(hunter, targets);
+            if (nearer) {
+              nearer.color = 'blue';
+              hunter.seekSteering(nearer.id, this.moveHunter.bind(this, hunter), this.pullTarget.bind(this, hunter));
+            }
+          }
+        }
+      } catch (err) {
+        _didIteratorError2 = true;
+        _iteratorError2 = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion2 && _iterator2.return) {
+            _iterator2.return();
+          }
+        } finally {
+          if (_didIteratorError2) {
+            throw _iteratorError2;
+          }
+        }
+      }
+
+      targets.forEach(function (target) {
+        target.debug = debug;
+        if (target.position.x > canvas.width / 2) target.position.x += -canvas.width;
+        if (target.position.x < -canvas.width / 2) target.position.x += canvas.width;
+
+        if (target.position.y > canvas.height / 2) target.position.y += -canvas.height;
+        if (target.position.y < -canvas.height / 2) target.position.y += canvas.height;
+      });
+    }
+  }, {
+    key: 'generateTarget',
+    value: function generateTarget(_ref2) {
+      var x = _ref2.x,
+          y = _ref2.y;
+      var ctx = this.ctx,
+          canvas = this.canvas,
+          debug = this.debug,
+          hunters = this.hunters,
+          targets = this.targets;
+
+      for (var i = 0; i < 100; i++) {
+        var direction = i * 10;
+        var magnitude = 15;
+        var dx = x + Math.round(magnitude * Math.cos(direction)) + Math.random();
+        var dy = y + Math.round(magnitude * Math.sin(direction)) + Math.random() * (i * 10);
+        var angle = 0; //coordinatesToDeg(dx - x, dy - y);
+        var initForce = new _Vector2.default({ ctx: ctx, canvas: canvas, magnitude: 150, direction: 0 /*angle*/ });
+        initForce.run = false;
+        var forces = [initForce];
+        var target = new _Explorer2.default({ forces: forces, color: 'white', angle: angle, mass: 50, speedUp: true, canvas: canvas, ctx: ctx, debug: debug, x: dx, y: dy, width: 15, height: 15, maxForce: 0.6, maxVelocity: 4 });
+        //console.log(target.angle / Math.PI * 180)
+        var _iteratorNormalCompletion3 = true;
+        var _didIteratorError3 = false;
+        var _iteratorError3 = undefined;
+
+        try {
+          for (var _iterator3 = (0, _getIterator3.default)(hunters), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+            var hunter = _step3.value;
+
+            target.addHunter(hunter);
+            hunter.addTarget(target);
+          }
+        } catch (err) {
+          _didIteratorError3 = true;
+          _iteratorError3 = err;
+        } finally {
+          try {
+            if (!_iteratorNormalCompletion3 && _iterator3.return) {
+              _iterator3.return();
+            }
+          } finally {
+            if (_didIteratorError3) {
+              throw _iteratorError3;
+            }
+          }
+        }
+
+        targets.push(target);
+        //console.log(targets)
+      }
+    }
+  }, {
+    key: 'preload',
+    value: function preload() {
+      var _this3 = this;
+
+      var canvas = this.canvas,
+          ctx = this.ctx,
+          debug = this.debug;
+
+      this.hunters = [new _Hunter2.default({ ctx: ctx, debug: debug, size: 20, speedUp: true, mass: 100, color: 'yellow', canvas: canvas, width: 25, height: 25, maxForce: 0.1, maxVelocity: 10 })];
+      canvas.addEventListener('mouseup', function (e) {
+        var mousePos = (0, _index.getMousePos)(canvas, e);
+
+        var _calcCartesiano = (0, _index.calcCartesiano)(mousePos.x, mousePos.y, canvas),
+            x = _calcCartesiano.x,
+            y = _calcCartesiano.y;
+
+        var deg = (0, _index.coordinatesToDeg)(x, y);
+        var mag = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
+        //this.targets[0].position.set(mag);
+        //this.targets[0].position.direction = deg * Math.PI / 180;
+        _this3.generateTarget({ x: x, y: y });
+      });
+    }
+  }]);
+  return Universe;
+}(_Timelaps3.default);
+
+/***/ }),
+/* 165 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = undefined;
+
+var _getPrototypeOf = __webpack_require__(54);
+
+var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
+
+var _classCallCheck2 = __webpack_require__(0);
+
+var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+
+var _createClass2 = __webpack_require__(1);
+
+var _createClass3 = _interopRequireDefault(_createClass2);
+
+var _possibleConstructorReturn2 = __webpack_require__(58);
+
+var _possibleConstructorReturn3 = _interopRequireDefault(_possibleConstructorReturn2);
+
+var _inherits2 = __webpack_require__(84);
+
+var _inherits3 = _interopRequireDefault(_inherits2);
+
+var _TextBox = __webpack_require__(31);
+
+var _TextBox2 = _interopRequireDefault(_TextBox);
+
+var _Explotion = __webpack_require__(112);
+
+var _Explotion2 = _interopRequireDefault(_Explotion);
+
+var _Motion = __webpack_require__(160);
+
+var _Motion2 = _interopRequireDefault(_Motion);
+
+var _BarChart = __webpack_require__(152);
+
+var _BarChart2 = _interopRequireDefault(_BarChart);
+
+var _Grid = __webpack_require__(109);
+
+var _Grid2 = _interopRequireDefault(_Grid);
+
+var _Circle = __webpack_require__(161);
+
+var _Circle2 = _interopRequireDefault(_Circle);
+
+var _Vector = __webpack_require__(93);
+
+var _Vector2 = _interopRequireDefault(_Vector);
+
+var _SpaceShip2 = __webpack_require__(149);
+
+var _SpaceShip3 = _interopRequireDefault(_SpaceShip2);
+
+var _index = __webpack_require__(14);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var Hunter = function (_SpaceShip) {
+  (0, _inherits3.default)(Hunter, _SpaceShip);
+
+  function Hunter(_ref) {
+    var ctx = _ref.ctx,
+        _ref$speedUp = _ref.speedUp,
+        speedUp = _ref$speedUp === undefined ? true : _ref$speedUp,
+        _ref$stroke = _ref.stroke,
+        stroke = _ref$stroke === undefined ? true : _ref$stroke,
+        _ref$size = _ref.size,
+        size = _ref$size === undefined ? 20 : _ref$size,
+        _ref$maxVelocity = _ref.maxVelocity,
+        maxVelocity = _ref$maxVelocity === undefined ? 5 : _ref$maxVelocity,
+        _ref$maxForce = _ref.maxForce,
+        maxForce = _ref$maxForce === undefined ? 0.5 : _ref$maxForce,
+        _ref$targets = _ref.targets,
+        targets = _ref$targets === undefined ? [] : _ref$targets,
+        _ref$width = _ref.width,
+        width = _ref$width === undefined ? 20 : _ref$width,
+        _ref$height = _ref.height,
+        height = _ref$height === undefined ? 20 : _ref$height,
+        canvas = _ref.canvas,
+        _ref$debug = _ref.debug,
+        debug = _ref$debug === undefined ? false : _ref$debug,
+        _ref$mass = _ref.mass,
+        mass = _ref$mass === undefined ? 40 : _ref$mass,
+        _ref$forces = _ref.forces,
+        forces = _ref$forces === undefined ? [] : _ref$forces,
+        _ref$x = _ref.x,
+        x = _ref$x === undefined ? 0 : _ref$x,
+        _ref$y = _ref.y,
+        y = _ref$y === undefined ? 0 : _ref$y,
+        _ref$angle = _ref.angle,
+        angle = _ref$angle === undefined ? 0 : _ref$angle,
+        _ref$velocity = _ref.velocity,
+        velocity = _ref$velocity === undefined ? 0 : _ref$velocity,
+        _ref$acceleration = _ref.acceleration,
+        acceleration = _ref$acceleration === undefined ? 0 : _ref$acceleration,
+        _ref$color = _ref.color,
+        color = _ref$color === undefined ? 'white' : _ref$color,
+        _ref$id = _ref.id,
+        id = _ref$id === undefined ? (0, _index.guid)() : _ref$id,
+        _ref$display = _ref.display,
+        display = _ref$display === undefined ? true : _ref$display;
+    (0, _classCallCheck3.default)(this, Hunter);
+    return (0, _possibleConstructorReturn3.default)(this, (Hunter.__proto__ || (0, _getPrototypeOf2.default)(Hunter)).call(this, { ctx: ctx, speedUp: speedUp, stroke: stroke, size: size, maxVelocity: maxVelocity, maxForce: maxForce, targets: targets, width: width, height: height, canvas: canvas, debug: debug, mass: mass, forces: forces, x: x, y: y, angle: angle, velocity: velocity, acceleration: acceleration, color: color, id: id, display: display }));
+  }
+
+  (0, _createClass3.default)(Hunter, [{
+    key: 'seekSteering',
+    value: function seekSteering(id, result, done) {
+      var segments = this.segments,
+          targets = this.targets,
+          velocity = this.velocity,
+          canvas = this.canvas,
+          ctx = this.ctx,
+          debug = this.debug,
+          maxForce = this.maxForce;
+
+      var segment = this.getSegment(id);
+      var target = this.getTarget(id);
+      if (segment && target) {
+        this.angle = segment.direction;
+        if (this.isCollide(target)) {
+          var segmentIndex = this.getSegmentIndex(id);
+          var targetIndex = this.getTargetIndex(id);
+          if (done) {
+            done(segmentIndex, targetIndex);
+          }
+        } else {
+          var desired = segment.clone({ color: 'white', display: true });
+          desired.render();
+          desired.mult(3);
+
+          var _vectorSubtraction = (0, _index.vectorSubtraction)(desired, velocity),
+              magnitude = _vectorSubtraction.magnitude,
+              direction = _vectorSubtraction.direction;
+
+          var steer = new _Vector2.default({ ctx: ctx, canvas: canvas, magnitude: magnitude, direction: direction, color: 'green' });
+          steer.limit(desired.getMagnitude() * maxForce);
+          if (result) result(steer, desired);
+        }
+      }
+    }
+  }, {
+    key: 'draw',
+    value: function draw() {
+      var angle = this.angle,
+          mass = this.mass,
+          width = this.width,
+          skin = this.skin,
+          height = this.height,
+          position = this.position,
+          ctx = this.ctx,
+          color = this.color,
+          acceleration = this.acceleration,
+          velocity = this.velocity,
+          info = this.info,
+          debug = this.debug;
+      var x = position.x,
+          y = position.y;
+
+      ctx.save(); //save angle
+      ctx.beginPath();
+      ctx.scale(1, -1);
+      ctx.fillStyle = color;
+      ctx.strokeStyle = color;
+      ctx.translate(x, y);
+      ctx.rotate(angle);
+      ctx.lineWidth = 8;
+      ctx.lineCap = 'round';
+
+      ctx.translate(width / 2 / 2, 0);
+      ctx.lineTo(-(width / 2), height / 2);
+      ctx.lineTo(width / 2, -(height / 2) + height / 2);
+      ctx.lineTo(-(width / 2), -height / 2);
+
+      ctx.lineTo(-(width / 2), height / 2);
+      ctx.lineTo(width / 2, -(height / 2) + height / 2);
+      ctx.lineTo(-(width / 2), -height / 2);
+      ctx.lineTo(-width, -(height / 2) + height / 2);
+      ctx.lineTo(-(width / 2), height / 2);
+
+      ctx.lineTo(-(width / 2), height / 2);
+      ctx.lineTo(width / 2, -(height / 2) + height / 2);
+      ctx.lineTo(-(width / 2), -height / 2);
+      ctx.lineTo(-(width / 8), -(height / 2) + height / 2);
+      ctx.moveTo(-(width / 2), height / 2);
+      ctx.lineTo(-(width / 8), -(height / 2) + height / 2);
+      ctx.fill();
+      ctx.closePath();
+      ctx.restore();
+      acceleration.render();
+      velocity.render();
+      position.render();
+      if (debug) this.drawShildForce();
+    }
+  }]);
+  return Hunter;
+}(_SpaceShip3.default);
+
+exports.default = Hunter;
+
+/***/ }),
+/* 166 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = undefined;
+
+var _getPrototypeOf = __webpack_require__(54);
+
+var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
+
+var _classCallCheck2 = __webpack_require__(0);
+
+var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+
+var _createClass2 = __webpack_require__(1);
+
+var _createClass3 = _interopRequireDefault(_createClass2);
+
+var _possibleConstructorReturn2 = __webpack_require__(58);
+
+var _possibleConstructorReturn3 = _interopRequireDefault(_possibleConstructorReturn2);
+
+var _inherits2 = __webpack_require__(84);
+
+var _inherits3 = _interopRequireDefault(_inherits2);
+
+var _TextBox = __webpack_require__(31);
+
+var _TextBox2 = _interopRequireDefault(_TextBox);
+
+var _Explotion = __webpack_require__(112);
+
+var _Explotion2 = _interopRequireDefault(_Explotion);
+
+var _Motion = __webpack_require__(160);
+
+var _Motion2 = _interopRequireDefault(_Motion);
+
+var _BarChart = __webpack_require__(152);
+
+var _BarChart2 = _interopRequireDefault(_BarChart);
+
+var _Grid = __webpack_require__(109);
+
+var _Grid2 = _interopRequireDefault(_Grid);
+
+var _Circle = __webpack_require__(161);
+
+var _Circle2 = _interopRequireDefault(_Circle);
+
+var _Vector = __webpack_require__(93);
+
+var _Vector2 = _interopRequireDefault(_Vector);
+
+var _SpaceShip2 = __webpack_require__(149);
+
+var _SpaceShip3 = _interopRequireDefault(_SpaceShip2);
+
+var _index = __webpack_require__(14);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var Explorer = function (_SpaceShip) {
+  (0, _inherits3.default)(Explorer, _SpaceShip);
+
+  function Explorer(_ref) {
+    var ctx = _ref.ctx,
+        _ref$speedUp = _ref.speedUp,
+        speedUp = _ref$speedUp === undefined ? true : _ref$speedUp,
+        _ref$hunters = _ref.hunters,
+        hunters = _ref$hunters === undefined ? [] : _ref$hunters,
+        _ref$stroke = _ref.stroke,
+        stroke = _ref$stroke === undefined ? true : _ref$stroke,
+        _ref$size = _ref.size,
+        size = _ref$size === undefined ? 20 : _ref$size,
+        _ref$maxVelocity = _ref.maxVelocity,
+        maxVelocity = _ref$maxVelocity === undefined ? 5 : _ref$maxVelocity,
+        _ref$maxForce = _ref.maxForce,
+        maxForce = _ref$maxForce === undefined ? 0.5 : _ref$maxForce,
+        _ref$targets = _ref.targets,
+        targets = _ref$targets === undefined ? [] : _ref$targets,
+        _ref$width = _ref.width,
+        width = _ref$width === undefined ? 20 : _ref$width,
+        _ref$height = _ref.height,
+        height = _ref$height === undefined ? 20 : _ref$height,
+        canvas = _ref.canvas,
+        _ref$debug = _ref.debug,
+        debug = _ref$debug === undefined ? false : _ref$debug,
+        _ref$mass = _ref.mass,
+        mass = _ref$mass === undefined ? 40 : _ref$mass,
+        _ref$forces = _ref.forces,
+        forces = _ref$forces === undefined ? [] : _ref$forces,
+        _ref$x = _ref.x,
+        x = _ref$x === undefined ? 0 : _ref$x,
+        _ref$y = _ref.y,
+        y = _ref$y === undefined ? 0 : _ref$y,
+        _ref$angle = _ref.angle,
+        angle = _ref$angle === undefined ? 0 : _ref$angle,
+        _ref$velocity = _ref.velocity,
+        velocity = _ref$velocity === undefined ? 0 : _ref$velocity,
+        _ref$acceleration = _ref.acceleration,
+        acceleration = _ref$acceleration === undefined ? 0 : _ref$acceleration,
+        _ref$color = _ref.color,
+        color = _ref$color === undefined ? 'white' : _ref$color,
+        _ref$id = _ref.id,
+        id = _ref$id === undefined ? (0, _index.guid)() : _ref$id,
+        _ref$display = _ref.display,
+        display = _ref$display === undefined ? true : _ref$display;
+    (0, _classCallCheck3.default)(this, Explorer);
+
+    var _this = (0, _possibleConstructorReturn3.default)(this, (Explorer.__proto__ || (0, _getPrototypeOf2.default)(Explorer)).call(this, { ctx: ctx, speedUp: speedUp, stroke: stroke, size: size, maxVelocity: maxVelocity, maxForce: maxForce, targets: targets, width: width, height: height, canvas: canvas, debug: debug, mass: mass, forces: forces, x: x, y: y, angle: angle, velocity: velocity, acceleration: acceleration, color: color, id: id, display: display }));
+
+    var position = _this.position;
+
+    var magnitude = size * 5;
+    var direction = _this.angle;
+    _this.virtualView = new _Vector2.default({ ctx: ctx, color: 'white', canvas: canvas, magnitude: magnitude, direction: direction, translateX: position.x, translateY: position.y });
+    var sum = (0, _index.vectorAddition)(position, _this.virtualView);
+    _this.rangeView = new _Circle2.default({ ctx: ctx, debug: debug, color: 'orange', stroke: true, size: size * 10, canvas: canvas, x: sum.x, y: sum.y });
+    _this.hunters = hunters;
+    _this.wave = 0;
+    _this.f = (0, _index.getRandomInt)(1, 10) * 0.01;
+    return _this;
+  }
+
+  (0, _createClass3.default)(Explorer, [{
+    key: 'moveSenoidal',
+    value: function moveSenoidal() {
+      var position = this.position;
+
+      var frec = 1.05;
+      position.y += Math.cos(this.wave) * frec;
+      position.x += Math.cos(this.wave) * frec;
+      this.wave += this.f; // 0.05;
+    }
+  }, {
+    key: 'runAway',
+    value: function runAway(hunter) {
+      var ctx = this.ctx,
+          canvas = this.canvas,
+          rangeView = this.rangeView,
+          maxForce = this.maxForce;
+
+      var _vectorAddition = (0, _index.vectorAddition)(hunter.position, this.position),
+          x = _vectorAddition.x,
+          y = _vectorAddition.y;
+
+      var _vectorSubtraction = (0, _index.vectorSubtraction)(hunter.position, this.position),
+          magnitude = _vectorSubtraction.magnitude;
+
+      magnitude *= 1.5;
+      //console.log(this.position.direction)
+      var escape = new _Vector2.default({ ctx: ctx, canvas: canvas, direction: -(this.angle / Math.PI * 180), magnitude: magnitude });
+      var desired = escape;
+      var calc = (0, _index.vectorSubtraction)(desired, this.velocity);
+      var direction = (0, _index.coordinatesToDeg)(x, y);
+      //console.log('x: ', x, ' y:', y);
+      var steer = new _Vector2.default({ ctx: ctx, canvas: canvas, magnitude: calc.magnitude, direction: direction, color: 'green' });
+      steer.limit(escape.getMagnitude() * 0.5);
+      escape.run = true;
+      steer.run = true;
+      this.forces[1] = escape;
+      this.forces[2] = steer;
+      var a = (0, _index.vectorAddition)(escape, steer);
+      this.angle = (0, _index.coordinatesToDeg)(a.x, a.y) * Math.PI / 180; //* 0.5;
+      var m = Math.sqrt(Math.pow(a.x, 2) + Math.pow(a.y, 2));
+      this.forces[0].setDirection(Math.round(m * Math.cos(this.angle)), Math.round(m * Math.sin(this.angle)));
+    }
+  }, {
+    key: 'setSafeMove',
+    value: function setSafeMove() {
+      this.forces = this.forces.map(function (force, index) {
+        if (force.run) force.setMagnitude(force.getMagnitude() * 0.01);
+        return force;
+      }).filter(function (force) {
+        return Math.floor(force.getMagnitude()) !== 0;
+      });
+    }
+  }, {
+    key: 'updateMotion',
+    value: function updateMotion() {
+      var targets = this.targets,
+          segments = this.segments,
+          hunters = this.hunters,
+          rangeView = this.rangeView,
+          size = this.size,
+          debug = this.debug,
+          virtualView = this.virtualView,
+          position = this.position,
+          forces = this.forces;
+
+      this.moveSenoidal();
+      if (forces.length) this.applayForces();
+      position.display = debug;
+      for (var i = 0; i < targets.length; i++) {
+        var target = targets[i];
+        var segment = segments[i];
+        var calc = this.calculateSegment(target);
+        segment.translateX = calc.translateX;
+        segment.translateY = calc.translateY;
+        segment.direction = calc.direction;
+        segment.setMagnitude(calc.magnitude);
+        if (debug) {
+          segment.display = true;
+          segment.render();
+        }
+      }
+
+      for (var _i = 0; _i < hunters.length; _i++) {
+        var hunter = hunters[_i];
+        var _segment = segments[_i];
+        var _calc = rangeView.calculateSegment(hunter);
+        _segment.translateX = _calc.translateX;
+        _segment.translateY = _calc.translateY;
+        _segment.direction = _calc.direction;
+
+        _segment.setMagnitude(_calc.magnitude);
+        if (debug) {
+          _segment.display = true;
+          _segment.render();
+        }
+      }
+      virtualView.translateX = position.x;
+      virtualView.translateY = position.y;
+
+      var _vectorAddition2 = (0, _index.vectorAddition)(position, virtualView),
+          x = _vectorAddition2.x,
+          y = _vectorAddition2.y;
+
+      rangeView.position.x = x;
+      rangeView.position.y = y;
+    }
+  }, {
+    key: 'addHunter',
+    value: function addHunter(hunter) {
+      this.joinCircles(hunter, this.rangeView.position, 'purple');
+      this.hunters.push(hunter);
+    }
+  }, {
+    key: 'shouldRunFrom',
+    value: function shouldRunFrom(hunter) {
+      var hunters = this.hunters,
+          rangeView = this.rangeView,
+          segments = this.segments;
+
+      var circle = hunters.find(function (item) {
+        return item.id === hunter.id;
+      });
+      var segment = segments.find(function (item) {
+        return item.id === hunter.id;
+      });
+      if (circle && segment) {
+        var isCollide = segment.getMagnitude() < hunter.size + rangeView.size;
+        return isCollide;
+      }
+      return false;
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      var debug = this.debug;
+
+      this.update();
+      if (debug) {
+        this.virtualView.render();
+        this.rangeView.render();
+        this.updateInfo();
+      }
+      this.draw();
+    }
+  }]);
+  return Explorer;
+}(_SpaceShip3.default);
+
+exports.default = Explorer;
 
 /***/ })
 /******/ ]);

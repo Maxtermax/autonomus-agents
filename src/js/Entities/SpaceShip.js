@@ -8,8 +8,8 @@ import Vector from '../components/Vector.js'
 import { isOverLapping, guid, coordinatesToDeg, calcCartesiano, vectorSubtraction, computeForce } from '../utils/index.js'
 
 export default class SpaceShip extends Motion {
-  constructor({ ctx, speedUp = true, stroke = true, size = 20, maxVelocity = 5, maxForce = 0.5, targets = [], width = 20, height = 20, canvas, debug = false, mass = 40, forces = [], x = 0, y = 0, angle = 0, velocity = 0, acceleration = 0, color = 'white', id = guid(), display = true }) {
-    super({ ctx, canvas, speedUp, mass, x, y, maxVelocity, maxForce });
+  constructor({ ctx, speedUp = true, stroke = true, skin = 'explorer', size = 20, maxVelocity = 5, maxForce = 0.5, targets = [], width = 20, height = 20, canvas, debug = false, mass = 40, forces = [], x = 0, y = 0, angle = 0, velocity = 0, acceleration = 0, color = 'white', id = guid(), display = true }) {
+    super({ ctx, canvas, speedUp, mass, x, y, maxVelocity, maxForce, angle, id });
     this.width = width;
     this.height = height;
     this.color = color;
@@ -19,12 +19,14 @@ export default class SpaceShip extends Motion {
     this.forces = forces;
     this.stroke = stroke;
     this.canvas = canvas;
+    this.skin = skin;
     this.info = new TextBox({ ctx, x, y, id: 'info', data: `deg: ${this.position.direction}, x: ${this.position.x}, y: ${this.position.y}` });
   }
 
   draw() {
-    let { angle, mass, width, follower, height, position, ctx, color, acceleration, velocity, info, debug } = this;
+    let { angle, mass, width, skin, height, position, ctx, color, acceleration, velocity, info, debug } = this;
     let { x, y } = position;
+
     ctx.save();//save angle
     ctx.beginPath();
     ctx.scale(1, -1);
@@ -34,17 +36,6 @@ export default class SpaceShip extends Motion {
     ctx.rotate(angle);
     ctx.lineWidth = 8;
     ctx.lineCap = 'round';
-    /*
-    ctx.lineTo(-(width/2), height/2);
-    ctx.lineTo(width/2, -(height/2)+height/2);
-    ctx.lineTo(-(width/2), -height/2);    
-    
-    ctx.lineTo(-(width/2), height/2);
-    ctx.lineTo(width/2, -(height/2)+height/2);
-    ctx.lineTo(-(width/2), -height/2);    
-    ctx.lineTo(-width, -(height/2)+height/2);
-    ctx.lineTo(-(width/2), height/2);
-    */
 
     ctx.lineTo(-(width / 2), height / 2);
     ctx.lineTo(width / 2, -(height / 2) + height / 2);
@@ -58,11 +49,11 @@ export default class SpaceShip extends Motion {
     acceleration.render();
     velocity.render();
     position.render();
-    this.drawShildForce();
+    if (debug) this.drawShildForce();
   }
 
   drawShildForce() {
-    let { ctx, canvas, color, size, position, stroke } = this;
+    let { ctx, canvas, color, size, position, stroke, skin } = this;
     let { x, y } = position;
     ctx.save();
     ctx.beginPath();
@@ -80,11 +71,13 @@ export default class SpaceShip extends Motion {
   }
 
   updateInfo() {
+    /*
     let { position, info, mass, angle, vectors, acceleration } = this;
     //  info.data = `deg: ${Math.floor(angle)}, x: ${Math.floor(position.x)}, y: ${Math.floor(position.y)}`;
     info.x = position.x;
     info.y = -position.y + 30;
     info.render();
+    */
   }
 
   stop(id) {
@@ -112,27 +105,52 @@ export default class SpaceShip extends Motion {
     }
   }
 
-  calculateSteering(id, result, done) {
+  landSteering(id, result, done) {
     let { segments, targets, velocity, canvas, ctx, debug, maxForce } = this;
     let segment = this.getSegment(id);
     let target = this.getTarget(id);
     if (segment && target) {
-      this.angle = segment.direction; 
+      this.angle = segment.direction;
       if (this.isCollide(target)) {
         let segmentIndex = this.getSegmentIndex(id);
         let targetIndex = this.getTargetIndex(id);
-        if (done) done(segmentIndex, targetIndex);
+        if (done) {
+          done(segmentIndex, targetIndex);
+        }
       } else {
         let desired = segment;
-        let { x, y } = vectorSubtraction(desired, velocity);
-        let direction = -coordinatesToDeg(x, y);
-        let magnitude = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
-        let steer = new Vector({ ctx, canvas, magnitude, direction, display: true, color: 'green' });
-        steer.mult(maxForce);
-        if(result) result(steer, desired);
+        let { magnitude, direction } = vectorSubtraction(desired, velocity);
+
+        let steer = new Vector({ ctx, canvas, magnitude, direction: -direction, display: true, color: 'green' });
+        steer.limit(desired.getMagnitude() * maxForce);
+        if (result) result(steer, desired);
       }
     }
   }
+
+  shouldEscape() {
+  }
+
+  seekSteering(id, result, done) {
+    let { segments, targets, velocity, canvas, ctx, debug, maxForce } = this;
+    let segment = this.getSegment(id);
+    let target = this.getTarget(id);
+    if (segment && target) {
+      this.angle = segment.direction;
+      if (this.isCollide(target)) {
+        let segmentIndex = this.getSegmentIndex(id);
+        let targetIndex = this.getTargetIndex(id);
+        if (done) done(segmentIndex, targetIndex);        
+      } else {        
+        let desired = segment;
+        let { magnitude, direction } = vectorSubtraction(desired, velocity);
+        let steer = new Vector({ ctx, canvas, magnitude, direction, color: 'green' });
+        steer.limit(desired.getMagnitude() * maxForce);
+        if (result) result(steer, desired);
+      }
+    }
+  }
+
 
   steering(id, done) {
     let { segments, targets, velocity, canvas, ctx, debug } = this;
@@ -146,9 +164,7 @@ export default class SpaceShip extends Motion {
         if (done) done(segmentIndex, targetIndex);
       } else {
         let desired = segment;
-        let { x, y } = vectorSubtraction(desired, velocity);
-        let direction = coordinatesToDeg(x, y);
-        let magnitude = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
+        let { magnitude, direction } = vectorSubtraction(desired, velocity);
         let steer = new Vector({ ctx, canvas, magnitude, direction, display: true, color: 'green' });
         this.move(steer);
       }
@@ -156,7 +172,7 @@ export default class SpaceShip extends Motion {
   }
 
   render() {
-    let { width, height, x, y, ctx, angle, color, debug } = this;
+    let { debug } = this;
     this.update();
     if (debug) this.updateInfo();
     this.draw();
