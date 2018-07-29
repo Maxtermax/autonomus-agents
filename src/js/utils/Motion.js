@@ -57,8 +57,6 @@ export default class Motion {
     //console.log(this.segments)
   }
 
-
-
   setAngle(angle) {
     this.angle = angle * Math.PI / 180;
   }
@@ -98,9 +96,11 @@ export default class Motion {
   applayForces() {
     let { forces = [], mass, acceleration, maxVelocity, speedUp, position, velocity, canvas, debug } = this;
     for (let force of forces) {
-      this.move(force);
       force.translateX = position.x;
       force.translateY = position.y;
+    }
+    for (let force of forces) {
+      this.move(force);
       if (debug) force.render();
     }
   }

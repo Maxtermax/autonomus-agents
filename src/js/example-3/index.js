@@ -26,28 +26,28 @@ class Universe extends Timelaps {
     this.bottom_ctrl.onchange = e => {
       let force = this.spaceship.forces[3];
       let { value } = e.target;
-      force.set(value);
+      force.setMagnitude(value);
       show_bottom.innerHTML = `Bottom force: ${Math.floor(value)}`;
     }
 
     this.top_ctrl.onchange = e => {
       let force = this.spaceship.forces[2];
       let { value } = e.target;
-      force.set(value);
+      force.setMagnitude(value);
       show_top.innerHTML = `Top force: ${Math.floor(value)}`;
     }
 
     this.right_ctrl.onchange = e => {
       let force = this.spaceship.forces[0];
       let { value } = e.target;
-      force.set(value);
+      force.setMagnitude(value);
       show_right.innerHTML = `Right force: ${Math.floor(value)}`;
     }
 
     this.left_ctrl.onchange = e => {
       let force = this.spaceship.forces[1];
       let { value } = e.target;
-      force.set(value);
+      force.setMagnitude(value);
       show_left.innerHTML = `Left force: ${Math.floor(force.magnitude)}`;
     }
 

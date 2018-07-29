@@ -128,9 +128,6 @@ export default class SpaceShip extends Motion {
     }
   }
 
-  shouldEscape() {
-  }
-
   seekSteering(id, result, done) {
     let { segments, targets, velocity, canvas, ctx, debug, maxForce } = this;
     let segment = this.getSegment(id);
@@ -150,7 +147,6 @@ export default class SpaceShip extends Motion {
       }
     }
   }
-
 
   steering(id, done) {
     let { segments, targets, velocity, canvas, ctx, debug } = this;
