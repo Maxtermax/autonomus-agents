@@ -18,6 +18,6 @@ app.get('/pages/:page', (req, res) => {
   return res.status(404).send();
 })
 
-app.listen(3009, 'localhost', () => {
+app.listen(PORT, 'localhost', () => {
   console.log(`Listen on port: ${PORT}`);
 })

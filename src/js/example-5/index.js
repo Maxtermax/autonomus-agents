@@ -55,7 +55,7 @@ class Universe extends Timelaps {
     let { canvas, ctx, debug, points, mouse, targets } = this;
     targets.forEach(target => {
       target.debug = debug;
-      let collide = mouse.isCollide(target);  
+      let collide = mouse.isCollide(target);
       if (collide) {
         target.color = 'red';
         target.stroke = false;
@@ -69,12 +69,23 @@ class Universe extends Timelaps {
     mouse.render();
   }
 
-  generateTarget({ x, y }) {
+  generateTarget({ x, y, color = 'blue' }) {
     let { ctx, canvas, debug, mouse, targets } = this;
-    let point = new Circle({ stroke: true, ctx, canvas, x, y, size: 50, debug, color: 'blue' });
+    console.log(color)
+    let point = new Circle({ stroke: true, ctx, canvas, x, y, size: 25, debug, color });
     mouse.joinCircles(point);
-    mouse.targets.push(point); 
+    mouse.targets.push(point);
     targets.push(point);
+  }
+
+  generatePattern() {
+    let space = 2;
+    for (let i = 0; i < (this.canvas.width/2)/50; i++) {
+      let pull = -(this.canvas.width / 2)/2;
+      let x = ((i * 50)+pull)*space;
+      let y = Math.sin(i)*100;
+      this.generateTarget({ x, y });
+    }
   }
 
   preload() {
@@ -88,14 +99,14 @@ class Universe extends Timelaps {
       this.mouse.position.x = x;
       this.mouse.position.y = y;
     })
-    
+    this.generatePattern();
     canvas.addEventListener('mouseup', e => {
       let mousePos = getMousePos(canvas, e);
       let { x, y } = calcCartesiano(mousePos.x, mousePos.y, canvas);
       let deg = coordinatesToDeg(x, y);
       this.generateTarget({ x, y });
     })
-    
+
   }
 
 }

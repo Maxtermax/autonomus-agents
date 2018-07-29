@@ -1171,6 +1171,10 @@ var Router = function () {
 }();
 
 var pages = new Router([{
+  page: '',
+  view: 'landing.html',
+  init: function init() {}
+}, {
   page: '#example-1',
   view: 'example-1.html',
   init: function init() {
@@ -5680,17 +5684,31 @@ var Universe = function (_Timelaps) {
     key: 'generateTarget',
     value: function generateTarget(_ref2) {
       var x = _ref2.x,
-          y = _ref2.y;
+          y = _ref2.y,
+          _ref2$color = _ref2.color,
+          color = _ref2$color === undefined ? 'blue' : _ref2$color;
       var ctx = this.ctx,
           canvas = this.canvas,
           debug = this.debug,
           mouse = this.mouse,
           targets = this.targets;
 
-      var point = new _Circle2.default({ stroke: true, ctx: ctx, canvas: canvas, x: x, y: y, size: 50, debug: debug, color: 'blue' });
+      console.log(color);
+      var point = new _Circle2.default({ stroke: true, ctx: ctx, canvas: canvas, x: x, y: y, size: 25, debug: debug, color: color });
       mouse.joinCircles(point);
       mouse.targets.push(point);
       targets.push(point);
+    }
+  }, {
+    key: 'generatePattern',
+    value: function generatePattern() {
+      var space = 2;
+      for (var i = 0; i < this.canvas.width / 2 / 50; i++) {
+        var pull = -(this.canvas.width / 2) / 2;
+        var x = (i * 50 + pull) * space;
+        var y = Math.sin(i) * 100;
+        this.generateTarget({ x: x, y: y });
+      }
     }
   }, {
     key: 'preload',
@@ -5714,7 +5732,7 @@ var Universe = function (_Timelaps) {
         _this2.mouse.position.x = x;
         _this2.mouse.position.y = y;
       });
-
+      this.generatePattern();
       canvas.addEventListener('mouseup', function (e) {
         var mousePos = (0, _index.getMousePos)(canvas, e);
 

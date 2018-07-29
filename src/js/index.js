@@ -43,6 +43,13 @@ class Router {
 
 let pages = new Router([
   {
+    page: '',
+    view: `landing.html`,
+    init: () => {
+      
+    }
+  },
+  {
     page: '#example-1',
     view: `example-1.html`,
     init: () => {
