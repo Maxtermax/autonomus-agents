@@ -1,8 +1,12 @@
 {
-  "name": "space-invaders",
+  "name": "project-s",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "app.js",
+  "engines": {
+    "node": "9.3.0",
+    "yarn": "1.7.0"
+  },  
   "scripts": {
     "debug": "NODE_ENV=development node --inspect app.js",
     "start": "NODE_ENV=production node app.js",
