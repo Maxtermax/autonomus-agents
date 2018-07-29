@@ -4,7 +4,7 @@ const path = require('path');
 const fs = require('fs');
 const app = express();
 const ENV = process.env.NODE_ENV;
-const PORT = ENV === "production" ? process.env.PORT : 3009;//must run on this port to be allow run the service worker correctly
+const PORT = process.env.PORT || 5000;
 app.use(express.static(path.resolve(__dirname, './public')));
 
 app.get('/', (req, res) => {
