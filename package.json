@@ -8,8 +8,8 @@
     "yarn": "1.7.0"
   },  
   "scripts": {
-    "debug": "NODE_ENV=development node --inspect app.js",
-    "start": "NODE_ENV=production node app.js",
+    "debug": "node --inspect app.js",
+    "start": "node app.js",
     "webpack": "./node_modules/.bin/webpack",
     "dev": "yarn webpack --config  webpack.dev.js",
     "dev:watch": "yarn webpack --watch --config webpack.dev.js",
