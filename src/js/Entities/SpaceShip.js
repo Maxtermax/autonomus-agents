@@ -71,13 +71,13 @@ export default class SpaceShip extends Motion {
   }
 
   updateInfo() {
-    /*
     let { position, info, mass, angle, vectors, acceleration } = this;
-    //  info.data = `deg: ${Math.floor(angle)}, x: ${Math.floor(position.x)}, y: ${Math.floor(position.y)}`;
-    info.x = position.x;
-    info.y = -position.y + 30;
-    info.render();
-    */
+    if(info) {
+      info.data = `mass: ${Math.floor(mass)}, x: ${Math.floor(position.x)}, y: ${Math.floor(position.y)}`;
+      info.x = position.x;
+      info.y = -position.y + 30;
+      info.render();    
+    }
   }
 
   stop(id) {

@@ -6,17 +6,17 @@ import Grid from '../components/Grid.js'
 import Circle from '../components/Circle.js'
 import Vector from '../components/Vector.js'
 import SpaceShip from './SpaceShip.js'
-import { isOverLapping, guid, coordinatesToDeg, getRandomInt, calcCartesiano, vectorAddition, vectorSubtraction, computeForce } from '../utils/index.js'
+import { isOverLapping, guid, coordinatesToDeg, vectorDotProduct, getRandomInt, calcCartesiano, vectorAddition, vectorSubtraction, computeForce, degrees2rads, radians2deg } from '../utils/index.js'
 
 export default class Explorer extends SpaceShip {
   constructor({ ctx, speedUp = true, hunters = [], stroke = true, size = 20, maxVelocity = 5, maxForce = 0.5, targets = [], width = 20, height = 20, canvas, debug = false, mass = 40, forces = [], x = 0, y = 0, angle = 0, velocity = 0, acceleration = 0, color = 'white', id = guid(), display = true }) {
     super({ ctx, speedUp, stroke, size, maxVelocity, maxForce, targets, width, height, canvas, debug, mass, forces, x, y, angle, velocity, acceleration, color, id, display });
     let { position } = this;
-    let magnitude = size * 5;
+    let magnitude = size + 190;
     let direction = this.angle;
     this.virtualView = new Vector({ ctx, color: 'white', canvas, magnitude, direction, translateX: position.x, translateY: position.y });
     let sum = vectorAddition(position, this.virtualView);
-    this.rangeView = new Circle({ ctx, debug, color: 'orange', stroke: true, size: size * 10, canvas, x: sum.x, y: sum.y });
+    this.rangeView = new Circle({ ctx, angle: this.virtualView.direction, debug, color: 'orange', stroke: true, size: size * 20, canvas, x: sum.x, y: sum.y });
     this.hunters = hunters;
     this.wave = 0;
     this.f = getRandomInt(1, 10) * 0.01;
@@ -31,38 +31,49 @@ export default class Explorer extends SpaceShip {
   }
 
   runAway(hunter) {
-    let { ctx, canvas, rangeView, maxForce } = this;
-    let { x, y } = vectorAddition(hunter.position, this.position);
+    let { ctx, canvas, rangeView, maxForce, id, position } = this;
+    this.forces[1] = null;
+    if (!!this.forces[1]) return;
     let { magnitude } = vectorSubtraction(hunter.position, this.position);
-    magnitude *= 1.5;
-    //console.log(this.position.direction)
-    let escape = new Vector({ ctx, canvas, direction: -(this.angle / Math.PI * 180), magnitude });
+    let r = this.forces[0];
+    let h = hunter.getSegment(id);
+    let dot = vectorDotProduct(h, r);
+    if (isNaN(dot)) return;
+    let isOpposite = radians2deg(dot) >= 90 && radians2deg(dot) <= 270;
+    console.log('isOpposite: ', isOpposite);
+    let oppositeSide = isOpposite ? radians2deg(this.angle) + 180 : radians2deg(this.angle);
+    let escape = new Vector({ color: 'green', ctx, canvas, direction: oppositeSide, magnitude });
+    this.velocity.setDirection(escape.x, escape.y);    
     let desired = escape;
     let calc = vectorSubtraction(desired, this.velocity);
-    let direction = coordinatesToDeg(x, y);
-    //console.log('x: ', x, ' y:', y);
-    let steer = new Vector({ ctx, canvas, magnitude: calc.magnitude, direction, color: 'green' });
+    let steer = new Vector({ ctx, color: 'blue', canvas, magnitude: calc.magnitude, direction: calc.direction, color: 'green' });
     steer.limit(escape.getMagnitude() * 0.5);
-    escape.run = true;
     steer.run = true;
+    
+    escape.run = true;
     this.forces[1] = escape;
+    this.angle = escape.direction;
+    this.forces[0].setDirection(escape.x, escape.y);
+
     this.forces[2] = steer;
-    let a = vectorAddition(escape, steer);
-    this.angle = (coordinatesToDeg(a.x, a.y) * Math.PI / 180) //* 0.5;
-    let m = Math.sqrt(Math.pow(a.x, 2) + Math.pow(a.y, 2));
-    this.forces[0].setDirection(Math.round(m * Math.cos(this.angle)), Math.round(m * Math.sin(this.angle)));
   }
 
   setSafeMove() {
+    let less = 15;
     this.forces = this.forces.map((force, index) => {
-      if (force.run) force.setMagnitude(force.getMagnitude() * 0.01);
+      if (force.run) {
+        force.setMagnitude(force.getMagnitude() - less);
+      }
       return force;
-    }).filter(force => (Math.floor(force.getMagnitude()) !== 0))
+    }).filter(force => force.getMagnitude() > less);
   }
 
   updateMotion() {
-    let { targets, segments, hunters, rangeView, size, debug, virtualView, position, forces } = this;
+    let { angle, targets, segments, hunters, rangeView, size, debug, virtualView, position, forces } = this;
     this.moveSenoidal();
+    let px = Math.round(virtualView.magnitude * Math.cos(angle));
+    let py = Math.round(virtualView.magnitude * Math.sin(angle));
+    virtualView.setDirection(px, py);
     if (forces.length) this.applayForces();
     position.display = debug;
     for (let i = 0; i < targets.length; i++) {

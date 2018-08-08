@@ -96,6 +96,24 @@ const vectorSubtraction = (a, b) => {
   return result;
 }
 
+const vectorNormalization = (v) => {
+  let result = {};
+  result.x = v.x / v.magnitude;
+  result.y = v.y / v.magnitude;
+  result.magnitude = v.magnitude / v.magnitude;
+  return result;
+}
+
+const vectorDotProduct = (a, b) => {
+  let x = a.x * b.x;
+  let y = a.y * b.y;
+  let calc = (x + y) / (a.getMagnitude() * b.getMagnitude());
+  let result = Math.acos(calc);
+  //if (isNaN(result)) result = Math.asin(calc);
+  console.log('calc: ', calc, ' result: ', result);
+  return result;
+}
+
 const vectorAddition = (a, b) => {
   let result = {};
   result.x = a.x + b.x;
@@ -114,6 +132,9 @@ const computeForce = (force, scale) => {
   return { x, y };
 }
 
+const degrees2rads = degrees => degrees * Math.PI / 180;
+const radians2deg = radians => radians * 180 / Math.PI;
+
 module.exports = {
   calcCenter,
   isCollide,
@@ -125,6 +146,10 @@ module.exports = {
   everyFrame,
   getRandomInt,
   vectorSubtraction,
+  vectorNormalization,
+  vectorDotProduct,
   computeForce,
-  vectorAddition
+  vectorAddition,
+  degrees2rads,
+  radians2deg
 }
