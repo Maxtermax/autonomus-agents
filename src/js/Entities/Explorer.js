@@ -18,17 +18,8 @@ export default class Explorer extends SpaceShip {
     let sum = vectorAddition(position, this.virtualView);
     this.rangeView = new Circle({ ctx, angle: this.virtualView.direction, debug, color: 'orange', stroke: true, size: size * 20, canvas, x: sum.x, y: sum.y });
     this.hunters = hunters;
-    this.wave = 0;
-    this.f = getRandomInt(1, 10) * 0.01;
   }
 
-  moveSenoidal() {
-    let { position } = this;
-    let frec = 1.05;
-    position.y += Math.cos(this.wave) * frec;
-    position.x += Math.cos(this.wave) * frec;
-    this.wave += this.f// 0.05;
-  }
 
   runAway(hunter) {
     let { ctx, canvas, rangeView, maxForce, id, position } = this;
@@ -40,7 +31,7 @@ export default class Explorer extends SpaceShip {
     let dot = vectorDotProduct(h, r);
     if (isNaN(dot)) return;
     let isOpposite = radians2deg(dot) >= 90 && radians2deg(dot) <= 270;
-    console.log('isOpposite: ', isOpposite);
+    //console.log('isOpposite: ', isOpposite);
     let oppositeSide = isOpposite ? radians2deg(this.angle) + 180 : radians2deg(this.angle);
     let escape = new Vector({ color: 'green', ctx, canvas, direction: oppositeSide, magnitude });
     this.velocity.setDirection(escape.x, escape.y);    

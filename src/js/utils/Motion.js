@@ -106,7 +106,7 @@ export default class Motion {
   }
 
   updateMotion() {
-    let { targets, segments, debug, position, forces } = this;
+    let { targets, segments, velocity, debug, position, forces } = this;
     if (forces.length) {
       this.applayForces();
     }

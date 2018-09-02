@@ -4,8 +4,9 @@ import EntityApplyForces from './example-3/index.js';
 import EntityApplyAcceleration from './example-4/index.js';
 import ObjectsCollision from './example-5/index.js';
 import EntitySeekTarget from './example-6/index.js';
-import EntitySteeringBehavior from './example-7/index.js';
-import HunterSimulation from './example-8/index.js';
+import FleeSteeringBehavior from './example-7/index.js';
+import GroupSteering from './example-8/index.js';
+import HunterSimulation from './example-9/index.js';
 
 class Router {
   constructor(routes) {
@@ -31,6 +32,7 @@ class Router {
     try {
       let response = await fetch(`/pages/${this.currentPage}`);
       response.text().then(text => {
+        //console.log(text)
         App.innerHTML = text;
         route.init();
       });
@@ -95,12 +97,19 @@ let pages = new Router([
     page: '#example-7',
     view: `example-7.html`,
     init: () => {
-      EntitySteeringBehavior();
+      FleeSteeringBehavior();
     }                    
   },
   {
     page: '#example-8',
     view: `example-8.html`,
+    init: () => {
+      GroupSteering();
+    }
+  },
+  {
+    page: '#example-9',
+    view: `example-9.html`,
     init: () => {
       HunterSimulation();
     }                        

@@ -28,7 +28,7 @@ export default class Hunter extends SpaceShip {
       } else {
         let desired = segment.clone({ color: 'white', display: true });
         //desired.render();
-        desired.mult(10);
+        desired.mult(5);
         let { magnitude, direction } = vectorSubtraction(desired, velocity);
         let steer = new Vector({ ctx, canvas, magnitude, direction, color: 'green' });        
         steer.limit(desired.getMagnitude() * maxForce);

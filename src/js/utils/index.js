@@ -17,6 +17,33 @@ const isCollide = (type = 'square', a, b) => {
   }
 }
 
+const randomRgba = () => {
+  var o = Math.round, r = Math.random, s = 255;
+  return 'rgba(' + o(r() * s) + ',' + o(r() * s) + ',' + o(r() * s) + ',' + r().toFixed(1) + ')';
+}
+
+function vectorSubtraction2(a, b) {
+  var memSpaceShips = turbojs.alloc(2);
+  turbojs.run(memSpaceShips, `
+    float coordinatesToDeg(float x, float y) {
+      float rad = atan(y, x);
+      float deg = rad * 360.0 / (2.0 * ${Math.PI});
+      return deg;
+    }
+    
+    void main(void) {   
+      vec4 a = vec4(${parseFloat(a.x).toFixed(2)}, ${parseFloat(a.y).toFixed(2)}, ${parseFloat(a.magnitude).toFixed(2)}, ${parseFloat(a.direction).toFixed(2)}); 
+      vec4 b = vec4(${parseFloat(b.x).toFixed(2)}, ${parseFloat(b.y).toFixed(2)}, ${parseFloat(b.magnitude).toFixed(2)}, ${parseFloat(b.direction).toFixed(2)}); 
+      vec4 resultado = a - b;
+      vec4 mem = read();
+      mem[0] = length(resultado);
+      mem[1] = coordinatesToDeg(resultado.x, resultado.y);
+      commit(mem);    
+    }
+  `);
+  let result = memSpaceShips.data.subarray(0, 2);
+  return { magnitude: result[0], direction: result[1] }
+}
 
 const guid = () => {
   function s4() {
@@ -96,6 +123,13 @@ const vectorSubtraction = (a, b) => {
   return result;
 }
 
+const vectorSplit = (a, f) => {
+  let result = {};
+  result.x = a.x / f;
+  result.y = a.y / f;
+  return result;  
+}
+
 const vectorNormalization = (v) => {
   let result = {};
   result.x = v.x / v.magnitude;
@@ -109,8 +143,7 @@ const vectorDotProduct = (a, b) => {
   let y = a.y * b.y;
   let calc = (x + y) / (a.getMagnitude() * b.getMagnitude());
   let result = Math.acos(calc);
-  //if (isNaN(result)) result = Math.asin(calc);
-  console.log('calc: ', calc, ' result: ', result);
+  //console.log('calc: ', calc, ' result: ', result);
   return result;
 }
 
@@ -118,6 +151,8 @@ const vectorAddition = (a, b) => {
   let result = {};
   result.x = a.x + b.x;
   result.y = a.y + b.y;
+  result.magnitude = Math.sqrt(Math.pow(result.x, 2) + Math.pow(result.y, 2));
+  result.direction = coordinatesToDeg(result.x, result.y);
   return result;
 }
 
@@ -130,6 +165,20 @@ const computeForce = (force, scale) => {
     }
   }
   return { x, y };
+}
+
+const virtualVector = ({ magnitude = 0, direction = 0, x = 0, y = 0}) => {
+  return {
+    x, y,
+    magnitude,
+    direction,
+    add: (a, b) => {
+      return vectorAddition(a, b);
+    },
+    div: (vector, f) => {
+      return vectorSplit(vector, f);
+    }
+  }
 }
 
 const degrees2rads = degrees => degrees * Math.PI / 180;
@@ -146,10 +195,14 @@ module.exports = {
   everyFrame,
   getRandomInt,
   vectorSubtraction,
+  vectorSubtraction2,
   vectorNormalization,
+  virtualVector,
   vectorDotProduct,
-  computeForce,
   vectorAddition,
+  vectorSplit,
+  computeForce,
   degrees2rads,
-  radians2deg
+  radians2deg,
+  randomRgba
 }

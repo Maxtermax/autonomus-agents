@@ -1,10 +1,9 @@
-import Explorer from '../Entities/Explorer.js'
-import Hunter from '../Entities/Hunter.js'
+import SpaceShip from '../Entities/SpaceShip.js'
 import Circle from '../components/Circle.js'
 import Vector from '../components/Vector.js'
 import Timelaps from '../utils/Timelaps.js';
-import { calcCartesiano, degrees2rads, getMousePos, vectorNormalization, vectorDotProduct, radians2deg, isCollide, vectorAddition, getRandomInt, coordinatesToDeg, vectorSubtraction } from '../utils/index.js'
-let g = 0;
+import { calcCartesiano, getMousePos, randomRgba, isCollide, vectorAddition, vectorSubtraction2, coordinatesToDeg, radians2deg, degrees2rads, vectorSubtraction } from '../utils/index.js'
+var stop = false;
 class Universe extends Timelaps {
   constructor({ canvas, ctx }) {
     super({ canvas, ctx });
@@ -12,18 +11,35 @@ class Universe extends Timelaps {
     this.debug = false;
     this.fps_ctrl = document.getElementById('fps_ctrl');
     this.show_fps = document.getElementById('show_fps');
-
+    this.show_max_force = document.getElementById('show_max_force');
+    this.show_max_velocity = document.getElementById('show_max_velocity');
+    this.max_force_ctrl = document.getElementById('max_force_ctrl');
+    this.max_velocity_ctrl = document.getElementById('max_velocity_ctrl');
+    this.spaceships_counter = document.getElementById('spaceships_counter');
+    this.spaceships_overlap = document.getElementById('spaceships_overlap');
     this.debug_ctrl = document.getElementById('debug');
     this.targets = [];
+    this.spaceships = [];
+
     this.fps_ctrl.onchange = (e) => {
       this.FPS = e.target.value;
       this.show_fps.innerHTML = `FPS: ${this.FPS}`;
     }
+    this.max_force_ctrl.onchange = (e) => {
+      for (let spaceship of this.spaceships) spaceship.maxForce = e.target.value;
+      this.show_max_force.innerHTML = `Max force: ${e.target.value}`;
+    }
+    this.max_velocity_ctrl.onchange = (e) => {
+      for (let spaceship of this.spaceships) spaceship.maxVelocity = e.target.value;
+      this.show_max_velocity.innerHTML = `Max velocity: ${e.target.value}`;
+    }
+    this.spaceships_counter.innerHTML = `Spaceships counter: ${this.spaceships.length}`;
+    this.spaceships_overlap.innerHTML = `Spaceships overlap: 0`;
     this.debug_ctrl.onchange = e => this.debug = this.debug_ctrl.checked;
   }
 
   render() {
-    let { canvas, ctx, debug, hunters, targets } = this;
+    let { canvas, ctx, debug, spaceships, targets } = this;
     this.then = this.now - (this.delta % this.interval);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.save();
@@ -33,30 +49,11 @@ class Universe extends Timelaps {
     ctx.translate(x, y);
     //ctx.scale(1, -1);
     if (debug) this.drawCroos();
-    /*
-    let d = vectorDotProduct(this.va, this.vb);
-    let opposite = radians2deg(d) >= 90 && radians2deg(d) <= 270;
-    //console.log('opposite: ', opposite, ' dif', radians2deg(d));
-    this.va.render();
-    this.vb.render();
-    */    
-    this.update();        
-    hunters.forEach(hunter => hunter.render());
-    targets.forEach(target => {
-      for (let hunter of this.hunters) {
-        if (target.shouldRunFrom(hunter)) {         
-          target.rangeView.color = 'red';
-          target.runAway(hunter);
-        } else {
-          target.rangeView.color = 'orange';
-          target.setSafeMove(hunter);
-        }
-      }
-      target.render();
-    });
+    this.update();
+    for (let spaceship of spaceships) spaceship.render();
+    targets.forEach(target => target.render());
     ctx.closePath();
     ctx.restore();
-    //g -= 1;
   }
 
   drawCroos() {
@@ -69,108 +66,241 @@ class Universe extends Timelaps {
     ctx.stroke();
   }
 
-  theNearerOne(hunter, targets) {
-    let smaller = hunter.segments[0];
-    let record = hunter.segments[0].getMagnitude();
-    hunter.segments.forEach((segment, index) => {
-      if (segment.getMagnitude() < record) {
-        record = segment.getMagnitude();
-        smaller = segment;
+  separateSpaceships(current, spaceships = []) {
+    let { ctx, canvas } = this;
+    let sum = new Vector({ ctx, canvas, magnitude: 1, direction: 0, color: 'green', display: true });
+    let total = 0;
+    let steer = current.forces[2];
+    let desired = current.forces[1];
+    let separate = steer && desired ? current.forces[3] : current.forces[1];
+    if (separate) {
+      separate.setMagnitude(separate.getMagnitude() - 0.2);
+      if (separate.getMagnitude() <= 0) return;
+    }
+    for (let i = 0; i < spaceships.length; i++) {
+      let spaceship = spaceships[i];
+      if (spaceship.id === current) continue;
+      current.addTarget(spaceship);
+      if (current.isCollide(spaceship)) {
+        let calc = current.calcSeparateForce(spaceship);
+        sum.add(calc);
+        total++;
       }
-    })
-    return targets.find(target => target.id === smaller.id);
-  }
-
-  pullTarget(hunter, segmentIndex, targetIndex) {
-    let { targets } = this;
-    hunter.segments.splice(segmentIndex, 1);
-    hunter.targets.splice(targetIndex, 1);
-    hunter.forces = [];
-    targets.splice(targetIndex, 1);
-  }
-
-  moveHunter(hunter, steer, desired) {
-    let { targets } = this;
-    hunter.forces[0] = steer;
-    hunter.forces[1] = desired;
-  }
-
-  update() {
-    let { canvas, ctx, debug, maxVelocity, targets, hunters } = this;
-    targets.forEach(target => {
-      target.debug = debug;
-      target.color = 'white';
-      if (target.position.x > canvas.width / 2) target.position.x += -canvas.width;
-      if (target.position.x < -canvas.width / 2) target.position.x += canvas.width;
-      if (target.position.y > canvas.height / 2) target.position.y += -canvas.height;
-      if (target.position.y < -canvas.height / 2) target.position.y += canvas.height;
-    })
-
-    for (let hunter of hunters) {
-      hunter.debug = debug;
-      if (hunter.position.x > canvas.width / 2) hunter.position.x += -canvas.width;
-      if (hunter.position.x < -canvas.width / 2) hunter.position.x += canvas.width;
-
-      if (hunter.position.y > canvas.height / 2) hunter.position.y += -canvas.height;
-      if (hunter.position.y < -canvas.height / 2) hunter.position.y += canvas.height;
-      if (targets.length) {
-        let nearer = this.theNearerOne(hunter, targets);
-        if (nearer) {
-          nearer.color = 'red';
-          hunter.seekSteering(nearer.id, this.moveHunter.bind(this, hunter), this.pullTarget.bind(this, hunter))
-        } 
-      }
+      current.targets.pop();
+      current.segments.pop();
+    }
+    if (total) sum.split(total);
+    sum.normalize();
+    sum.mult(2.8);
+    sum.translateX = current.position.x;
+    sum.translateY = current.position.y;
+    //sum.render();
+    if (steer && desired) {
+      current.forces[3] = sum;
+    } else {
+      current.forces[1] = sum;
     }
   }
 
-  generateTarget({ x, y }) {
-    let top = 200;
-    let { ctx, canvas, debug, hunters, targets } = this;
-    for (let i = 0; i < top; i++) {
-      let direction = i * 10;
-      let magnitude = 15;
-      let dx = x + Math.round(magnitude * Math.cos(direction)) + Math.random();
-      let dy = y + Math.round(magnitude * Math.sin(direction)) + Math.random() * (i * 10);
-      let angle = 0//coordinatesToDeg(dx - x, dy - y);
-      let initForce = new Vector({ ctx, canvas, magnitude: 150, direction: 0/*angle*/ });
-      initForce.run = false;
-      let forces = [initForce];
-      let target = new Explorer({ forces, color: 'white', angle, mass: 50, size: 10, speedUp: true, canvas, ctx, debug, x: dx, y: dy, width: 15, height: 15, maxForce: 0.1, maxVelocity: 4 });
-      //console.log(target.angle / Math.PI * 180)
-      for (let hunter of hunters) {
-        target.addHunter(hunter);
-        hunter.addTarget(target);
+  groupSpaceships(spaceships = []) {
+    this.spaceships_overlap.innerHTML = `Spaceships overlap: ${spaceships.length}`;
+    let { ctx, canvas, debug } = this;
+    let sum = new Vector({ ctx, canvas, magnitude: 1, direction: 0, color: 'green' });
+    for (let e = 0; e < spaceships.length; e++) {
+      let spaceship = spaceships[e];
+      //spaceship.color = 'red';
+      let head = spaceship.position.clone({ direction: spaceship.angle, display: true, magnitude: 1, color: 'red' });
+      head.translateX = spaceship.position.x;
+      head.translateY = spaceship.position.y;
+      head.render();
+      sum.translateX += spaceship.position.x;
+      sum.translateY += spaceship.position.y;
+      sum.add(head);
+    }
+    sum.split(spaceships.length);
+    //sum.mult(10);
+    sum.translateX /= spaceships.length;
+    sum.translateY /= spaceships.length;
+    ctx.beginPath();
+    ctx.strokeStyle = 'olive';
+    //ctx.fillRect(sum.translateX, -sum.translateY, 10, 10);
+    ctx.arc(sum.translateX, -sum.translateY, 150, 0, Math.PI * 2);
+    //ctx.stroke();
+    ctx.closePath();
+    if (debug) sum.render();
+
+    for (let e = 0; e < spaceships.length; e++) {
+      let { magnitude, direction } = vectorSubtraction({ x: sum.translateX, y: sum.translateY }, spaceships[e].position);
+      let segment = new Vector({ ctx, canvas, magnitude, direction: radians2deg(direction), color: 'white' });
+      segment.translateX = spaceships[e].position.x;
+      segment.translateY = spaceships[e].position.y;
+      if (debug) segment.render();
+      if (segment.getMagnitude() <= 80) {
+        let steer = spaceships[e].forces[1];
+        let desired = spaceships[e].forces[2];
+        if (desired && steer) {
+          if (desired.getMagnitude() !== 0) desired.setMagnitude(desired.getMagnitude() - 1);
+          if (steer.getMagnitude() !== 0) steer.setMagnitude(steer.getMagnitude() - 1);
+        }
+      } else {
+        let desired = segment.clone();
+        desired.normalize();
+        desired.setMagnitude(50);
+        //desired.mult(1.8);
+        let velocity = spaceships[0].velocity;
+        let s = vectorSubtraction(desired, velocity);
+        let steer = new Vector({ ctx, canvas, magnitude: s.magnitude, direction: radians2deg(s.direction), color: 'green' });
+        steer.limit(desired.getMagnitude() * 0.8);
+        spaceships[e].forces[1] = steer;
+        spaceships[e].forces[2] = desired;
+        //let average = (desired.direction + steer.direction + spaceships[e].forces[0].direction) / 3;
+        //this.angle = average;
+        //let x = Math.round(spaceships[e].forces[0].getMagnitude() * Math.cos(average));
+        //let y = Math.round(spaceships[e].forces[0].getMagnitude() * Math.sin(average));
+        //spaceships[e].forces[0].setDirection(x, y);
+        //spaceships[e].angle = degrees2rads(coordinatesToDeg(x, y));
       }
-      targets.push(target);
-      //console.log(targets)
+      this.separateSpaceships(spaceships[e], spaceships);
+    }
+
+  }
+
+  pickOnRadius(r) {
+    let result = {};
+    let { ctx, canvas, overlaps, spaceships } = this;
+    if (stop) debugger;
+    for (let prev = 0; prev < spaceships.length; prev++) {
+      let alreadIngroup = Object.keys(result).some(key => result[key].hasOwnProperty(spaceships[prev].id));
+      if (result.hasOwnProperty(spaceships[prev].id) || alreadIngroup) continue;
+      let rSize = spaceships[prev].size + r;
+      result[spaceships[prev].id] = {};
+      if (stop) debugger;
+      for (let next = prev + 1; next < spaceships.length; next++) {
+        if (spaceships[prev - 1] && result[spaceships[prev - 1].id] && result[spaceships[prev - 1].id].hasOwnProperty(spaceships[next].id)) continue;        
+        let { magnitude, direction } = vectorSubtraction(spaceships[next].position, spaceships[prev].position);
+        let segment = new Vector({ ctx, canvas, magnitude, direction: radians2deg(direction), color: 'white', display: false });
+        segment.translateX = spaceships[prev].position.x;
+        segment.translateY = spaceships[prev].position.y;
+        if (this.debug) segment.render();
+        ctx.beginPath();
+        ctx.strokeStyle = 'blue';
+        ctx.arc(spaceships[prev].position.x, -spaceships[prev].position.y, rSize, 0, Math.PI * 2);
+        if (this.debug) ctx.stroke();
+        ctx.closePath();
+        let overlaps = segment.getMagnitude() < (rSize + spaceships[next].size);
+        if (overlaps) {
+          let self = result[spaceships[prev].id];
+          let inOtherGroup = Object.keys(result).some(key =>
+            result[key].hasOwnProperty(spaceships[next].id)
+          )
+          if (inOtherGroup) continue;
+          self[spaceships[next].id] = next;
+        }
+        if (stop) debugger;
+      }
+      if (Object.keys(result[spaceships[prev].id]).length) {
+        result[spaceships[prev].id].index = prev;
+      } else {
+        delete result[spaceships[prev].id];
+      }
+      if (stop) debugger;
+    }
+    if (stop) debugger;
+
+    return result;
+  }
+
+  separateSteering(spaceships) {
+    let { ctx, canvas } = this;
+    for (let spaceship of spaceships) {
+      spaceship.separateFrom(spaceships);
+    }
+  }
+
+  update() {
+    let { canvas, ctx, debug, maxVelocity, targets, spaceships } = this;
+
+    for (let spaceship of spaceships) {
+      spaceship.debug = debug;
+      //spaceship.color = 'white';
+      let steer = spaceship.forces[1];
+      let desired = spaceship.forces[2];
+      if (desired && steer) {
+        if (desired.getMagnitude() !== 0) desired.setMagnitude(desired.getMagnitude() - 1);
+        if (steer.getMagnitude() !== 0) steer.setMagnitude(steer.getMagnitude() - 1);
+      }
+
+      if (spaceship.position.x > canvas.width / 2) spaceship.position.x = -canvas.width / 2;
+      if (spaceship.position.x < -canvas.width / 2) spaceship.position.x = canvas.width / 2;
+      if (spaceship.position.y > canvas.height / 2) spaceship.position.y = -canvas.height / 2;
+      if (spaceship.position.y < -canvas.height / 2) spaceship.position.y = canvas.height / 2;
+      //spaceship.moveSenoidal();
+      /*
+      for (let target of targets) {
+        spaceship.fleeSteering(target.id, (steer, desired) => {
+          spaceship.forces[1] = steer;
+          spaceship.forces[2] = desired;
+        });
+      }
+      */
+    }
+
+    let groups = this.pickOnRadius(250);
+    Object.keys(groups).forEach(group => {
+      let chunk = [];
+      Object.keys(groups[group]).forEach(members => chunk.push(spaceships[groups[group][members]]))
+      this.groupSpaceships(chunk);
+    })
+
+    this.spaceships_counter.innerHTML = `Spaceships counter: ${this.spaceships.length}`;
+    //Object.keys(groups).forEach(group => spaceships[groups[group].index].color = 'red')
+  }
+
+  generateTarget({ x, y }) {
+    let { ctx, canvas, debug, spaceships, targets } = this;
+    let size = 50;
+    let target = new Circle({ stroke: true, ctx, canvas, x, y, size, debug, color: 'red' });
+    targets.push(target);
+    for (let spaceship of spaceships) spaceship.addTarget(target);
+  }
+
+  generateSpaceships(data = {}, top = 3) {
+    let { canvas, ctx, debug } = this;
+    for (let i = 0; i < top; i++) {
+      let { x = (-canvas.width / 2) + 300, y = ((Math.random() * 100) * 2), magnitude = 50 } = data;
+      let forces = [
+        new Vector({ canvas, ctx, direction: 0, magnitude: magnitude + Math.random() * 10, display: false })
+      ]
+      this.spaceships.push(
+        new SpaceShip({ ctx, x, y, debug, canvas, forces, maxForce: 0.6, fleeForce: 60 })
+      )
     }
   }
 
   preload() {
-    let { canvas, ctx, debug } = this;
-    /*
-    this.va = new Vector({ magnitude: 100, direction: 180, translateY: -100, ctx, canvas });
-    this.vb = new Vector({ magnitude: 100, direction: 0, color: 'blue', ctx, canvas });
-    canvas.addEventListener('mousemove', e => {
-      let mousePos = getMousePos(canvas, e);
-      let { x, y } = calcCartesiano(mousePos.x, mousePos.y, canvas);
-      this.vb.setDirection(x, y);
-      this.va.setDirection(-x, -y);
-    })
-    */
-    this.hunters = [
-      new Hunter({ ctx, x: 100, y: 100, debug, size: 20, speedUp: true, mass: 100, color: 'yellow', canvas, width: 25, height: 25, maxForce: 0.6, maxVelocity: 50 })
-    ]
+    let { canvas } = this;
+    //this.generateSpaceships({}, 10);
+
     canvas.addEventListener('mouseup', e => {
       let mousePos = getMousePos(canvas, e);
       let { x, y } = calcCartesiano(mousePos.x, mousePos.y, canvas);
-      let deg = coordinatesToDeg(x, y);
-      let mag = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
-      //this.targets[0].position.set(mag);
-      //this.targets[0].position.direction = deg * Math.PI / 180;
-      this.generateTarget({ x, y });
+      //let mag = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
+      //this.spaceships[0].position.setMagnitude(mag);
+      //this.spaceships[0].position.setDirection(x, y);
+      this.generateSpaceships({ x, y, magnitude: 150 }, 1);
     })
-    
+
+    /*
+    this.generateTarget({ x: 0, y: 0 });
+    canvas.addEventListener('mousemove', e => {
+      let mousePos = getMousePos(canvas, e);
+      let { x, y } = calcCartesiano(mousePos.x, mousePos.y, canvas);
+      let mag = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
+      this.targets[0].position.setMagnitude(mag);
+      this.targets[0].position.setDirection(x, y);
+    })
+    */
+
   }
 }
 

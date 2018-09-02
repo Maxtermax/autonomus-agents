@@ -1,4 +1,4 @@
-import { guid } from '../utils/index.js'
+import { guid, coordinatesToDeg } from '../utils/index.js'
 export default class Vector {
   constructor({ ctx, translateX = 0, translateY = 0, size = 5, canvas, magnitude, direction = 0, id = guid(), display = true, color = 'red' }) {
     this.ctx = ctx;
@@ -69,7 +69,7 @@ export default class Vector {
   setDirection(x, y) {
     this.direction = Math.atan2(y, x);
     this.x = Math.round(this.magnitude * Math.cos(this.direction));
-    this.y = Math.round(this.magnitude * Math.sin(this.direction));    
+    this.y = Math.round(this.magnitude * Math.sin(this.direction));
   }
 
   add(vector) {
@@ -77,8 +77,27 @@ export default class Vector {
     this.y += vector.y;
   }
 
+  getHeadPosition() {
+    let { x, y, translateX, translateY } = this;
+    return { x: (x + translateX), y: (y + translateY) }
+  }
+
+  getBasePosition() {
+    let { translateX, translateY } = this;
+    return { x: translateX, y: translateY };
+  }
+
   getMagnitude() {
     return Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2));
+  }
+
+  getDirection() {
+    return coordinatesToDeg(this.x, this.y);
+  }
+
+  split(n) {
+    this.x = this.x / n;
+    this.y = this.y / n;
   }
 
   div(vector) {

@@ -1,7 +1,8 @@
 import SpaceShip from '../Entities/SpaceShip.js'
 import Circle from '../components/Circle.js'
+import Vector from '../components/Vector.js'
 import Timelaps from '../utils/Timelaps.js';
-import { calcCartesiano, getMousePos, isCollide, coordinatesToDeg, vectorSubtraction } from '../utils/index.js'
+import { calcCartesiano, getMousePos, isCollide, vectorAddition, coordinatesToDeg, radians2deg, degrees2rads, vectorSubtraction } from '../utils/index.js'
 
 class Universe extends Timelaps {
   constructor({ canvas, ctx }) {
@@ -17,24 +18,25 @@ class Universe extends Timelaps {
 
     this.debug_ctrl = document.getElementById('debug');
     this.targets = [];
+    this.spaceships = [];
+
     this.fps_ctrl.onchange = (e) => {
       this.FPS = e.target.value;
       this.show_fps.innerHTML = `FPS: ${this.FPS}`;
     }
     this.max_force_ctrl.onchange = (e) => {
-      this.spaceship.maxForce = e.target.value;
+      for (let spaceship of this.spaceships) spaceship.maxForce = e.target.value;
       this.show_max_force.innerHTML = `Max force: ${e.target.value}`;
     }
     this.max_velocity_ctrl.onchange = (e) => {
-      this.spaceship.maxVelocity = e.target.value;
+      for (let spaceship of this.spaceships) spaceship.maxVelocity = e.target.value;
       this.show_max_velocity.innerHTML = `Max velocity: ${e.target.value}`;
     }
     this.debug_ctrl.onchange = e => this.debug = this.debug_ctrl.checked;
-        
   }
 
   render() {
-    let { canvas, ctx, debug, spaceship, targets } = this;
+    let { canvas, ctx, debug, spaceships, targets } = this;
     this.then = this.now - (this.delta % this.interval);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.save();
@@ -45,7 +47,7 @@ class Universe extends Timelaps {
     //ctx.scale(1, -1);
     if (debug) this.drawCroos();
     this.update();
-    spaceship.render();
+    for (let spaceship of spaceships) spaceship.render();
     targets.forEach(target => target.render());
     ctx.closePath();
     ctx.restore();
@@ -62,73 +64,56 @@ class Universe extends Timelaps {
   }
 
   update() {
-    let { canvas, ctx, debug, maxVelocity, targets, spaceship } = this;
-    spaceship.debug = debug;
-    let s = 0;
-    let smaller;
-    targets.forEach((target, index) => {
-      target.debug = debug;
-      target.color = 'red';
-      if (target.size > s) {
-        s = target.size;
-        smaller = index;
+    let { canvas, ctx, debug, maxVelocity, targets, spaceships } = this;
+    for (let spaceship of spaceships) {
+      spaceship.debug = debug;
+      if (spaceship.position.x > canvas.width / 2) spaceship.position.x = -canvas.width / 2;
+      if (spaceship.position.x < -canvas.width / 2) spaceship.position.x = canvas.width / 2;
+      if (spaceship.position.y > canvas.height / 2) spaceship.position.y = -canvas.height / 2;
+      if (spaceship.position.y < -canvas.height / 2) spaceship.position.y = canvas.height / 2;
+      for (let target of targets) {
+        spaceship.fleeSteering(target.id, (steer, desired) => {
+          spaceship.forces[1] = steer;
+          spaceship.forces[2] = desired;
+        });
       }
-    });
-    if (targets.length) {
-      targets[smaller].color = 'blue';
-      let steer = spaceship.landSteering(targets[smaller].id, (steer, desired) => {
-        spaceship.forces[0] = steer;
-        spaceship.forces[1] = desired;
-      }, (segmentIndex, targetIndex) => {
-        spaceship.segments.splice(segmentIndex, 1);
-        spaceship.targets.splice(targetIndex, 1);
-        targets.splice(targetIndex, 1);
-        spaceship.forces = [];
-      });
     }
-
-    /*
-    let s = 0;
-    let smaller;
-    targets.forEach((target, index) => {
-      target.debug = debug;
-      if (target.size > s) {
-        s = target.size;
-        smaller = index;
-      }
-    });
-
-    if (targets.length) {
-      spaceship.steering(targets[smaller].id, (segmentIndex, targetIndex) => {
-        //spaceship.segments.splice(segmentIndex, 1);
-        //spaceship.targets.splice(targetIndex, 1);
-        //targets.splice(targetIndex, 1);
-      });
-    }
-    */
   }
 
   generateTarget({ x, y }) {
-    let { ctx, canvas, debug, spaceship, targets } = this;
-    let size = 10 + Math.random() * 100;
-    let target = new Circle({ stroke: false, ctx, canvas, x, y, size, debug, color: 'red' });
+    let { ctx, canvas, debug, spaceships, targets } = this;
+    let size = 50;
+    let target = new Circle({ stroke: true, ctx, canvas, x, y, size, debug, color: 'red' });
     targets.push(target);
-    spaceship.addTarget(target);
+    for (let spaceship of spaceships) spaceship.addTarget(target);
   }
 
-  preload() {
+  generateSpaceships() {
     let { canvas, ctx, debug } = this;
-    this.spaceship = new SpaceShip({ ctx, mass: 24, canvas, maxForce: 0.6  });
-    //this.generateTarget({ x: -100, y: -100 });
-    canvas.addEventListener('mouseup', e => {
+    let top = 10;
+    for (let i = 0; i < top; i++) {
+      let forces = [
+        new Vector({ canvas, ctx, direction: 0, magnitude: 100 + Math.random() * 10, display: false })
+      ]
+      let x = (-canvas.width / 2) - 25 + Math.random() * 100;
+      let y = (100 + (i * 10)) - 25 + Math.random() * 100;
+      this.spaceships.push(
+        new SpaceShip({ ctx, x, y, debug, canvas, forces, maxForce: 0.6, fleeForce: 60 })
+      )
+    }
+  }
+  preload() {
+    let { canvas } = this;
+    this.generateSpaceships();
+    this.generateTarget({ x: 0, y: 0 });
+    canvas.addEventListener('mousemove', e => {
       let mousePos = getMousePos(canvas, e);
       let { x, y } = calcCartesiano(mousePos.x, mousePos.y, canvas);
-      let deg = coordinatesToDeg(x, y);
       let mag = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
-      //this.targets[0].position.set(mag);
-      //this.targets[0].position.direction = deg * Math.PI / 180;
-      this.generateTarget({ x, y });
+      this.targets[0].position.setMagnitude(mag);
+      this.targets[0].position.setDirection(x, y);
     })
+
   }
 }
 
