@@ -1,5 +1,7 @@
 # Autonomus-agents
-[play online](https://byteflow.herokuapp.com/)
+[Explanation](https://slides.com/maxtermax/deck-99fb5e73-1617-4f84-ba87-8e2777998eea/fullscreen)
+
+[Play online](https://byteflow.herokuapp.com/)
 
 In orden to run the examples you must follow the next steps:
 
