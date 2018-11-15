@@ -1,0 +1,54 @@
+<!doctype html>
+<html>
+<script>
+  var Module = {
+    onRuntimeInitialized: function () {
+      let spaceships = [
+        {
+          x: 268, y: 140,
+          direction: 158.82984781107467143,
+          magnitude: 387.6625465530556,
+          size: 5
+        },
+        {
+          x: -265.87500000000006,
+          y: 186,
+          size: 5,
+          magnitude: 346.6298458009639,//sqrt(pow((*b).x, 2) + pow((*b).y, 2));
+          direction: 147.54782389850169011 //2.5751953311752422          
+        },
+        {
+          x: 268,
+          y: 186,
+          size: 5,
+          magnitude: 326.2207841324645,
+          direction: 0//2.5751953311752422          
+        }
+      ]
+
+      Module.init(spaceships.length);
+      spaceships.forEach((spaceship, index) => {
+        let { x, y, direction, magnitude, size } = spaceship;
+        let grouped = false;
+        let leader_of_group = -1;
+        Module.feed([x, y, direction, magnitude, size, index, grouped, leader_of_group]);
+      })
+      let resultado = Module.cluster();
+      for (var i = 0; i < resultado.size(); i++) {
+        let spaceship = resultado.get(i);
+        let x = spaceship[0];
+        let y = spaceship[1];
+        let direction = spaceship[2];
+        let magnitude = spaceship[3];
+        let size = spaceship[4];
+        let index = spaceship[5];
+        let grouped = spaceship[6];
+        let leader_of_group = spaceship[7];
+        console.log("Vector Value: ", x , ' ', y, ' ', magnitude, ' ', direction, ' ', size, ' ', index, ' ', grouped, ' ', leader_of_group);
+      }
+    }
+  };
+</script>
+<script src="test.js"></script>
+
+</html>

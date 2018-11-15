@@ -1,12 +1,13 @@
-import VectorsBehavior from './example-1/index.js';
-import EntitySenoidalMovement from './example-2/index.js';
-import EntityApplyForces from './example-3/index.js';
-import EntityApplyAcceleration from './example-4/index.js';
-import ObjectsCollision from './example-5/index.js';
-import EntitySeekTarget from './example-6/index.js';
-import FleeSteeringBehavior from './example-7/index.js';
-import GroupSteering from './example-8/index.js';
-import HunterSimulation from './example-9/index.js';
+import VectorsBehavior from './example-1/index.js'
+import EntitySenoidalMovement from './example-2/index.js'
+import EntityApplyForces from './example-3/index.js'
+import EntityApplyAcceleration from './example-4/index.js'
+import ObjectsCollision from './example-5/index.js'
+import EntitySeekTarget from './example-6/index.js'
+import FleeSteeringBehavior from './example-7/index.js'
+import GroupSteering from './example-8/index.js'
+import HunterSimulation from './example-9/index.js'
+import TrafficLight from './example-10/index.js'
 
 class Router {
   constructor(routes) {
@@ -113,5 +114,13 @@ let pages = new Router([
     init: () => {
       HunterSimulation();
     }                        
+  },
+  {
+    page: '#example-10',
+    view: `example-10.html`,
+    init: () => {
+      TrafficLight();
+    }                            
   }
 ])
+

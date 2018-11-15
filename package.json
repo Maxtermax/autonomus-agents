@@ -6,7 +6,7 @@
   "engines": {
     "node": "9.3.0",
     "yarn": "1.7.0"
-  },  
+  },
   "scripts": {
     "debug": "node --inspect app.js",
     "start": "node app.js",
@@ -22,7 +22,10 @@
     "babel-cli": "^6.26.0",
     "babel-plugin-module-resolver": "^3.1.0",
     "compression-webpack-plugin": "^1.1.7",
-    "express": "^4.16.2"
+    "express": "^4.16.2",
+    "node-sass": "^4.10.0",
+    "sass-loader": "^7.1.0",
+    "svg-path-parser": "^1.1.0"
   },
   "devDependencies": {
     "babel-core": "6.25.0",

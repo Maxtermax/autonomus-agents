@@ -2,21 +2,17 @@ import SpaceShip from '../Entities/SpaceShip.js'
 import Circle from '../components/Circle.js'
 import Vector from '../components/Vector.js'
 import Timelaps from '../utils/Timelaps.js';
-import { calcCartesiano, getMousePos, randomRgba, isCollide, vectorAddition, coordinatesToDeg, radians2deg, degrees2rads } from '../utils/index.js'
-
-const vectorSubtraction = (a, b) => {
-  return Module.vector_substraction(a, b);
-}
+import { calcCartesiano, getMousePos, randomRgba, isCollide, vectorAddition, vectorSubtraction2, coordinatesToDeg, radians2deg, degrees2rads, vectorSubtraction } from '../utils/index.js'
+var stop = false;
 
 class Universe extends Timelaps {
-  constructor({ canvas, ctx, ready }) {
+  constructor({ canvas, ctx }) {
     super({ canvas, ctx });
     this.play(this.render.bind(this));
     this.debug = false;
-    this.ready = false;
-    this.targets = [];
-    window.spaceships = this.spaceships = [];
     this.spaceships_counter = document.getElementById('spaceships_counter');
+    this.targets = [];
+    this.spaceships = [];
     this.spaceships_counter.innerHTML = `Spaceships counter: ${this.spaceships.length}`;
   }
 
@@ -90,7 +86,6 @@ class Universe extends Timelaps {
     for (let e = 0; e < spaceships.length; e++) {
       let spaceship = spaceships[e];
       //spaceship.color = 'red';
-      if (spaceship.clustered) continue;
       let head = spaceship.position.clone({ direction: spaceship.angle, display: true, magnitude: 1, color: 'red' });
       head.translateX = spaceship.position.x;
       head.translateY = spaceship.position.y;
@@ -106,18 +101,13 @@ class Universe extends Timelaps {
     ctx.beginPath();
     ctx.strokeStyle = 'olive';
     //ctx.fillRect(sum.translateX, -sum.translateY, 10, 10);
-    //ctx.arc(sum.translateX, -sum.translateY, 200, 0, Math.PI * 2);
+    ctx.arc(sum.translateX, -sum.translateY, 150, 0, Math.PI * 2);
     //ctx.stroke();
     ctx.closePath();
     if (debug) sum.render();
 
     for (let e = 0; e < spaceships.length; e++) {
-      if (spaceships[e].clustered) continue;
-      let { magnitude, direction } = vectorSubtraction({ 
-        x: sum.translateX, y: sum.translateY, 
-        magnitude: sum.magnitude,
-        direction: radians2deg(sum.direction)
-      }, spaceships[e].position);
+      let { magnitude, direction } = vectorSubtraction({ x: sum.translateX, y: sum.translateY }, spaceships[e].position);
       let segment = new Vector({ ctx, canvas, magnitude, direction: radians2deg(direction), color: 'white' });
       segment.translateX = spaceships[e].position.x;
       segment.translateY = spaceships[e].position.y;
@@ -155,11 +145,13 @@ class Universe extends Timelaps {
   pickOnRadius(r) {
     let result = {};
     let { ctx, canvas, overlaps, spaceships } = this;
+    if (stop) debugger;
     for (let prev = 0; prev < spaceships.length; prev++) {
       let alreadIngroup = Object.keys(result).some(key => result[key].hasOwnProperty(spaceships[prev].id));
       if (result.hasOwnProperty(spaceships[prev].id) || alreadIngroup) continue;
       let rSize = spaceships[prev].size + r;
       result[spaceships[prev].id] = {};
+      if (stop) debugger;
       for (let next = prev + 1; next < spaceships.length; next++) {
         if (spaceships[prev - 1] && result[spaceships[prev - 1].id] && result[spaceships[prev - 1].id].hasOwnProperty(spaceships[next].id)) continue;
         let { magnitude, direction } = vectorSubtraction(spaceships[next].position, spaceships[prev].position);
@@ -181,13 +173,17 @@ class Universe extends Timelaps {
           if (inOtherGroup) continue;
           self[spaceships[next].id] = next;
         }
+        if (stop) debugger;
       }
       if (Object.keys(result[spaceships[prev].id]).length) {
         result[spaceships[prev].id].index = prev;
       } else {
         delete result[spaceships[prev].id];
       }
+      if (stop) debugger;
     }
+    if (stop) debugger;
+
     return result;
   }
 
@@ -200,6 +196,7 @@ class Universe extends Timelaps {
 
   update() {
     let { canvas, ctx, debug, maxVelocity, targets, spaceships } = this;
+
     for (let spaceship of spaceships) {
       spaceship.debug = debug;
       //spaceship.color = 'white';
@@ -224,21 +221,16 @@ class Universe extends Timelaps {
       }
       */
     }
-    //let groups = this.pickOnRadius(250);    
-    if (this.ready) {
-      if (this.spaceships.length) {
-        let groups = Module.groupNavs(200);
-        Object.keys(groups).forEach(group => {
-          let chunk = [];
-          chunk.push(spaceships[group]);
-          Object.keys(groups[group]).forEach(subgroup => {
-            chunk.push(spaceships[subgroup]);
-          })
-          this.groupSpaceships(chunk);
-        })
-      }
-    }    
+
+    let groups = this.pickOnRadius(200);
+    Object.keys(groups).forEach(group => {
+      let chunk = [];
+      Object.keys(groups[group]).forEach(members => chunk.push(spaceships[groups[group][members]]))
+      this.groupSpaceships(chunk);
+    })
+
     this.spaceships_counter.innerHTML = `Spaceships counter: ${this.spaceships.length}`;
+    //Object.keys(groups).forEach(group => spaceships[groups[group].index].color = 'red')
   }
 
   generateTarget({ x, y }) {
@@ -253,7 +245,7 @@ class Universe extends Timelaps {
     let { canvas, ctx, debug } = this;
     for (let i = 0; i < top; i++) {
       let { x = (-canvas.width / 2) + 400, magnitude = 50 } = data;
-      data.y += (Math.random() * 4) + 50;
+      data.y += (Math.random() * 4)+50;
       let forces = [
         new Vector({ canvas, ctx, direction: 0, magnitude: magnitude + Math.random() * 10, display: false })
       ]
@@ -263,56 +255,10 @@ class Universe extends Timelaps {
     }
   }
 
-
-  preloadModule() {
-    let self = this;
-    window.Module = {
-      groupNavs: function () {
-        let result = {};
-        Module.init(self.spaceships.length);
-        self.spaceships.forEach((spaceship, index) => {
-          let { position, size, clustered = false } = spaceship;
-          //let { x, y, direction, magnitude } = position;
-          let grouped = clustered;
-          let leader_of_group = -1;
-          //if (grouped) console.log(grouped)
-          let offset = { ...position, direction: radians2deg(position.direction) }
-          Module.feed([offset, size, index, grouped, leader_of_group]);
-        })
-        let cluster = Module.cluster();
-        for (let i = 0; i < cluster.size(); i++) {
-          let spaceship = cluster.get(i);
-          let index = spaceship[2];//index
-          let grouped = spaceship[3];//grouped
-          let leader_of_group = spaceship[4];//leader_of_group 
-          if (grouped) {
-            //self.spaceships[index].clustered = grouped;
-            let alreadyExists = result.hasOwnProperty(leader_of_group);
-            if (alreadyExists) {
-              result[leader_of_group][index] = 0;
-            } else {
-              result[leader_of_group] = {};
-            }
-          }
-        }
-        Module.clear_vector();
-        return result;
-      }
-    };
-  }
-
-  async loadModule(cb) {
-    this.preloadModule();
-    var script = document.createElement('script');
-    script.onload = cb;
-    script.src = "/test.js";
-    document.getElementById('wrap-module').appendChild(script);
-  }
-
-  preload(cb) {
+  preload() {
     let { canvas } = this;
     //this.generateSpaceships({}, 10);
-    this.loadModule(cb);
+
     canvas.addEventListener('mouseup', e => {
       let mousePos = getMousePos(canvas, e);
       let { x, y } = calcCartesiano(mousePos.x, mousePos.y, canvas);
@@ -344,8 +290,6 @@ export default function () {
   const canvasWidth = canvas.width = intViewportWidth;
   const ctx = canvas.getContext('2d');
   let space = new Universe({ canvas, ctx });
-  space.preload(() => {
-    space.ready = true;
-    space.render();
-  });
+  space.preload();
+  space.render();
 }
