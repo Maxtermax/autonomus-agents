@@ -1,19 +1,18 @@
 {
-  "name": "project-s",
+  "name": "autonomus-agents",
   "version": "1.0.0",
   "description": "",
   "main": "app.js",
   "engines": {
-    "node": "9.3.0",
-    "yarn": "1.7.0"
+    "node": "18.17.1",
   },
   "scripts": {
     "debug": "node --inspect app.js",
     "start": "node app.js",
     "webpack": "./node_modules/.bin/webpack",
-    "dev": "yarn webpack --config  webpack.dev.js",
-    "dev:watch": "yarn webpack --watch --config webpack.dev.js",
-    "prod": "yarn webpack --config webpack.prod.js"
+    "dev": "npm run webpack --config  webpack.dev.js",
+    "dev:watch": "npm run webpack --watch --config webpack.dev.js",
+    "prod": "npm run webpack --config webpack.prod.js"
   },
   "author": "maxtermax",
   "license": "MIT",
