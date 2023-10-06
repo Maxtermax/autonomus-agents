@@ -4,7 +4,7 @@
   "description": "",
   "main": "app.js",
   "engines": {
-    "node": "18.17.1",
+    "node": "18.17.1"
   },
   "scripts": {
     "debug": "node --inspect app.js",
